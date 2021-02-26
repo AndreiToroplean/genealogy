@@ -19,7 +19,7 @@ class Surface(list):
 
     def __add__(self, other):
         rtn = Surface()
-        for a_line, b_line in zip_longest(self, other, fillvalue=()):
+        for a_line, b_line in zip_longest(self, other, fillvalue=SurfLine()):
             rtn.append(a_line + b_line)
         return rtn
 
@@ -78,7 +78,7 @@ class SurfLine(list):
 
 
 arrs = {
-        "tail": "╚═",
+        "tail": "╘═",
         "head": "═ ",
         "co": "═",
         "right": "╞",

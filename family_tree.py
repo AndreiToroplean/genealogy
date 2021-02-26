@@ -9,6 +9,8 @@ from surface import Surface, SurfPos, ArrowsSurface, arrs
 
 class FamilyTree:
     def __init__(self):
+        random.seed(0)
+
         self._real_names = {}
         self._people = []
         self._order = []
@@ -24,7 +26,7 @@ class FamilyTree:
         self._people = self._generate_people(data)
 
     def draw(self):
-        self._augmented_top_sort(n_iterations=16)
+        self._augmented_top_sort()
         self._generate_gens()
         self._draw_names_surf()
         self._draw_arrows_surf()
@@ -55,8 +57,6 @@ class FamilyTree:
                 key, parent_id = line.split(":")
                 child_id, rel = key.split(",")
                 data.append((child_id.strip(), rel.strip(), parent_id.strip()))
-        # random.seed(2)  # debug
-        # random.shuffle(data)  # debug
         data.sort()
         return data
 
@@ -113,7 +113,7 @@ class FamilyTree:
             self._order.append(child)
             return True
 
-    def _augmented_top_sort(self, n_iterations=8):
+    def _augmented_top_sort(self, n_iterations=64):
         visited = []
         while True:
             for node in self._people:
@@ -128,29 +128,39 @@ class FamilyTree:
 
         self._order.reverse()
 
-        for _ in range(n_iterations):
-            self._pull_children_down()
-            self._pull_parents_up()
+        for i in range(n_iterations):
+            self._pull_children_down(p_skip=0.0, skip_if_not_found=True)
+            self._pull_parents_up(p_skip=0.0, skip_if_not_found=True)
 
-    def _pull_parents_up(self):
+    def _pull_parents_up(self, *, force=1.0, p_skip=0.0, skip_if_not_found=False):
         for i, person in enumerate(self._order):
-            for j, pot_child in reversed(list(enumerate(self._order[:i]))):
+            if random.random() < p_skip:
+                continue
+            for j, pot_child in zip(range(len(self._order[:i]) - 1, -1, -1), reversed(self._order[:i])):
                 if pot_child in person.children:
                     break
             else:
-                j = -1
+                if skip_if_not_found:
+                    continue
+                j = 0
 
-            self._order.insert(j + 1, self._order.pop(i))
+            j = round(i + (j + 1 - i) * force)
+            self._order.insert(j, self._order.pop(i))
 
-    def _pull_children_down(self):
-        for i, person in zip(range(len(self._order) - 1, -1, -1), reversed(self._order)):
+    def _pull_children_down(self, *, force=1.0, p_skip=0.0, skip_if_not_found=False):
+        for i, person in enumerate(self._order):
+            if random.random() < p_skip:
+                continue
             for j, pot_parent in enumerate(self._order[i + 1:], start=i + 1):
                 if pot_parent in person.parents:
                     break
             else:
-                j = len(self._order) + 1
+                if skip_if_not_found:
+                    continue
+                j = len(self._order)
 
-            self._order.insert(j - 2, self._order.pop(i))
+            j = round(i + (j - 1 - i) * force)
+            self._order.insert(j, self._order.pop(i))
 
     def _generate_gens(self):
         self._gens = [0 for _ in self._order]
@@ -163,7 +173,7 @@ class FamilyTree:
                     continue
                 self._gens[i] = max(self._gens[i], self._gens[j] + 1)
 
-        for i, person in enumerate(self._order):
+        for i, person in zip(range(len(self._order) - 1, -1, -1), reversed(self._order)):
             min_gen = inf
             for parent in person.parents:
                 for j, pot_parent in enumerate(self._order[i:], start=i):
@@ -193,7 +203,6 @@ class FamilyTree:
             for cx in gen_cxs:
                 cx_lines = list(zip(*cx[0], *cx[1]))[0]
                 cx.extend([min(cx_lines), max(cx_lines), None])
-            gen_cxs.sort(key=lambda a: a[3] - a[2])
 
             chs_usages = [[] for _ in gen_cxs]
             for cx in gen_cxs:
