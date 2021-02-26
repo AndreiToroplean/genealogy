@@ -110,6 +110,8 @@ arrs_arithmetic = {
     (arrs["left_start"], arrs["right"]): arrs["both_start"],
     (arrs["left_end"], arrs["right"]): arrs["both_end"],
     (arrs["left_middle"], arrs["right"]): arrs["both_middle"],
+    (arrs["co"], arrs["right"]): arrs["co"],
+    (arrs["co"], arrs["left"]): arrs["co"],
     }
 
 
@@ -128,6 +130,9 @@ class ArrowsSurface(Surface):
         for line in range(start, end + 1):
             pos = SurfPos.from_gen(line, gen).co_right(channel)
             if line == start:
+                if line == end:
+                    self.draw(pos, arrs["co"])
+                    continue
                 self.draw(pos, arrs["start"])
             elif line == end:
                 self.draw(pos, arrs["end"])
