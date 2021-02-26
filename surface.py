@@ -120,9 +120,9 @@ class ArrowsSurface(Surface):
                 p_coords, c_coords, cx_min, cx_max, channel = cx
                 self._draw_channel(gen, channel, cx_min, cx_max)
                 for c_coord in c_coords:
-                    self._draw_child_co(c_coord.line, gen, channel)
+                    self._draw_child_co(c_coord, channel)
                 for p_coord in p_coords:
-                    self._draw_parent_co(p_coord.line, gen + 1, gen, channel)
+                    self._draw_parent_co(p_coord, gen, channel)
 
     def _draw_channel(self, gen, channel, start, end):
         for line in range(start, end + 1):
@@ -134,17 +134,15 @@ class ArrowsSurface(Surface):
             else:
                 self.draw(pos, arrs["middle"])
 
-    def _draw_child_co(self, line, gen, channel):
-        pos = SurfPos.from_gen(line, gen)
+    def _draw_child_co(self, pos, channel):
         co_start_pos = pos.co_tail
         co_end_pos = pos.co_right(channel)
         co_len = co_end_pos.index - co_start_pos.index - len(arrs["tail"])
         arr = arrs["tail"] + arrs["co"] * co_len + self._co_char(co_end_pos, arrs["left"])
         self.draw(co_start_pos, arr, no_overwrite=True)
 
-    def _draw_parent_co(self, line, p_gen, c_gen, channel):
-        p_pos = SurfPos.from_gen(line, p_gen)
-        co_start_pos = p_pos.co_left(channel, p_gen - c_gen)
+    def _draw_parent_co(self, p_pos, c_gen, channel):
+        co_start_pos = p_pos.co_left(channel, c_gen)
         co_end_pos = p_pos.co_head
         co_len = co_end_pos.index - co_start_pos.index - len(arrs["head"])
         arr = self._co_char(co_start_pos, arrs["right"]) + arrs["co"] * (co_len - 1) + arrs["head"]
@@ -191,8 +189,8 @@ class SurfPos(list):
     def co_right(self, channel):
         return self + [0, self._first_channel_shift + channel * self._add_channel_shift]
 
-    def co_left(self, channel, gen_diff):
-        return self + [0, self._first_channel_shift + channel * self._add_channel_shift - self._gen_shift * gen_diff]
+    def co_left(self, channel, c_gen):
+        return SurfPos([self.line, self._first_channel_shift + channel * self._add_channel_shift + self._gen_shift * c_gen])
 
     @property
     def co_tail(self):
