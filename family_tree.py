@@ -2,6 +2,7 @@ import random
 from enum import Enum
 
 from person import Person
+from surface import Surface, SurfPos, ArrowsSurface
 
 
 class FamilyTree:
@@ -10,9 +11,23 @@ class FamilyTree:
         self.people = {}
         self.order = []
         self.gens = []
+        self.coords = {}
+
+        self._cxs = []
+        self.names_surf = Surface()
+        self.arrows_surf = ArrowsSurface()
+        self.surf = Surface()
 
         data = self._read_data()
-        self._create_people(data)
+        self._generate_people(data)
+
+    def draw(self):
+        self._top_sort()
+        self._generate_gens()
+        self._draw_names_surf()
+        self._draw_arrows_surf()
+        self.surf = self.names_surf + self.arrows_surf
+        print(self.surf.as_str)
 
     def _read_data(self):
         data = []
@@ -27,17 +42,21 @@ class FamilyTree:
                     continue
 
                 if not is_data:
-                    nickname, name = line.split(":")
-                    self.real_names[nickname] = name
+                    id_, name = [s.strip() for s in line.split(":")]
+                    if id_ in self.real_names:
+                        raise Exception(f"IDs must be unique. '{id_}' is repeated at least twice. ")
+
+                    self.real_names[id_] = name
                     continue
 
                 key, parent_id = line.split(":")
                 child_id, rel = key.split(",")
                 data.append((child_id.strip(), rel.strip(), parent_id.strip()))
-        random.shuffle(data)
+        random.shuffle(data)  # debug
+        # data.sort()
         return data
 
-    def _create_people(self, data):
+    def _generate_people(self, data):
         for child_id, rel, parent_id in data:
             if child_id not in self.people:
                 child = Person(child_id)
@@ -59,27 +78,27 @@ class FamilyTree:
 
             parent.children.append(child)
 
-    def p_dfs(self, person, visited):
+    def _p_dfs(self, person, visited):
         if person in visited: return False
         visited.append(person)
 
         for parent in person.parents:
-            r = self.p_dfs(parent, visited)
+            r = self._p_dfs(parent, visited)
             if not r: continue
             self.order.append(parent)
         return True
 
-    def c_dfs(self, person, visited):
+    def _c_dfs(self, person, visited):
         if person in visited: return False
         visited.append(person)
 
         for child in person.children:
-            r = self.c_dfs(child, visited)
+            r = self._c_dfs(child, visited)
             if not r: continue
             self.order.append(child)
             return True
 
-    def top_sort(self):
+    def _top_sort(self):
         visited = []
         while True:
             for node in self.people.values():
@@ -89,7 +108,7 @@ class FamilyTree:
             else:
                 break
 
-            self.p_dfs(node, visited)
+            self._p_dfs(node, visited)
             self.order.append(node)
 
         self.order.reverse()
@@ -103,7 +122,7 @@ class FamilyTree:
 
             self.order.insert(j + 1, self.order.pop(i))
 
-    def create_gens(self):
+    def _generate_gens(self):
         self.gens = [0 for p in self.order]
         for i, person in enumerate(self.order):
             for child in person.children:
@@ -114,11 +133,67 @@ class FamilyTree:
                     continue
                 self.gens[i] = max(self.gens[i], self.gens[j] + 1)
 
-    def draw(self):
-        self.top_sort()
-        self.create_gens()
+    def _draw_names_surf(self):
+        prev_gen = -1
+        line = 0
         for person, gen in zip(self.order, self.gens):
-            print(" " * gen * 15 + person.name)
+            line += 1 if gen > prev_gen else 2
+            prev_gen = gen
+            self.names_surf.draw(SurfPos.from_gen(line, gen), person.name + " ")
+            self.coords[person.id] = SurfPos.from_gen(line, gen)
+
+    def _draw_arrows_surf(self):
+        cxs = self._generate_cxs()
+        cxs = self._allocate_channels(cxs)
+        self.arrows_surf.draw_connections(cxs, self.names_surf)
+
+    @staticmethod
+    def _allocate_channels(cxs):
+        for gen, gen_cxs in enumerate(cxs):
+            gen_cxs = list(gen_cxs.values())
+            for cx in gen_cxs:
+                cx_lines = list(zip(*cx[0], *cx[1]))[0]
+                cx.extend([min(cx_lines), max(cx_lines), None])
+            gen_cxs.sort(key=lambda a: a[3] - a[2])
+
+            chs_usages = [[] for _ in gen_cxs]
+            for cx in gen_cxs:
+                _, _, cx_min, cx_max, channel = cx
+                if channel is not None:
+                    continue
+
+                for pot_ch, ch_usages in enumerate(chs_usages):
+                    for usage in ch_usages:
+                        us_min, us_max = usage
+                        if not (cx_max < us_min or us_max < cx_min):
+                            break
+
+                    else:
+                        cx[4] = pot_ch
+                        ch_usages.append((cx_min, cx_max))
+                        break
+        return cxs
+
+    def _generate_cxs(self):
+        cxs = [{} for _ in set(self.gens)]
+        for person, gen in zip(self.order, self.gens):
+            parents = person.parents
+            if not parents:
+                continue
+
+            c_coords = self.coords[person.id] + [1, 0]
+            p_coords = [self.coords[parent.id] for parent in parents]
+
+            gen_cxs = cxs[gen]
+            couple_id = tuple(sorted([parent.id for parent in parents]))
+            try:
+                cx = gen_cxs[couple_id]
+            except KeyError:
+                gen_cxs[couple_id] = [p_coords, [c_coords]]
+            else:
+                cx[1].append(c_coords)
+
+        return cxs
 
 
 class Rel(Enum):
