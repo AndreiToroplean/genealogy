@@ -96,7 +96,6 @@ arrs = {
         "both_end": "╩",
         "both_middle": "╬",
         }
-arrs_rev = {v: k for k, v in arrs.items()}
 arrs_arithmetic = {
     (arrs["start"], arrs["left"]): arrs["left_start"],
     (arrs["start"], arrs["right"]): arrs["right_start"],

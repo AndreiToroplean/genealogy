@@ -25,14 +25,23 @@ class FamilyTree:
         data = self._read_data()
         self._people = self._generate_people(data)
 
+        self._draw_surf()
+
     def draw(self):
+        print(self._surf.as_str)
+
+    @property
+    def as_str(self):
+        return self._surf.as_str
+
+    def _draw_surf(self):
         self._augmented_top_sort()
         self._generate_gens()
         self._draw_names_surf()
         self._draw_arrows_surf()
         self._compress_surfs_vertically()
         self._surf = self._names_surf + self._arrows_surf
-        print(self._surf.as_str)
+        self._surf.add_line()
 
     def _read_data(self):
         data = []
