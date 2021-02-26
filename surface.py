@@ -57,7 +57,7 @@ class SurfLine(list):
             prev_char = self[index + i]
             if prev_char is not None:
                 has_collided = True
-                if no_overwrite and prev_char == arrs["middle"] and char == arrs["co"]:
+                if no_overwrite and char == arrs["co"]:
                     continue
             self[index + i] = char
         return has_collided
