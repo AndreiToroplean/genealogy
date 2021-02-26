@@ -20,17 +20,7 @@ class Surface(list):
     def __add__(self, other):
         rtn = Surface()
         for a_line, b_line in zip_longest(self, other, fillvalue=()):
-            rtn.add_line()
-            for a_c, b_c in zip_longest(a_line, b_line, fillvalue=None):
-                if a_c is not None:
-                    rtn[-1].append(a_c)
-                    continue
-
-                if b_c is not None:
-                    rtn[-1].append(b_c)
-                    continue
-
-                rtn[-1].append(" ")
+            rtn.append(a_line + b_line)
         return rtn
 
     @property
@@ -67,10 +57,20 @@ class SurfLine(list):
             prev_char = self[index + i]
             if prev_char is not None:
                 has_collided = True
-                if no_overwrite and prev_char == arrs["middle"]:
+                if no_overwrite and prev_char == arrs["middle"] and char == arrs["co"]:
                     continue
             self[index + i] = char
         return has_collided
+
+    def __add__(self, other):
+        rtn = SurfLine()
+        for char, other_char in zip_longest(self, other, fillvalue=None):
+            if char is not None:
+                rtn.append(char)
+                continue
+
+            rtn.append(other_char)
+        return rtn
 
     @property
     def as_str(self):

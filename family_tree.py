@@ -1,8 +1,9 @@
 import random
 from enum import Enum
+from itertools import zip_longest
 
 from person import Person
-from surface import Surface, SurfPos, ArrowsSurface
+from surface import Surface, SurfPos, ArrowsSurface, arrs
 
 
 class FamilyTree:
@@ -26,6 +27,7 @@ class FamilyTree:
         self._generate_gens()
         self._draw_names_surf()
         self._draw_arrows_surf()
+        self._compress_surfs_vertically()
         self.surf = self.names_surf + self.arrows_surf
         print(self.surf.as_str)
 
@@ -52,8 +54,7 @@ class FamilyTree:
                 key, parent_id = line.split(":")
                 child_id, rel = key.split(",")
                 data.append((child_id.strip(), rel.strip(), parent_id.strip()))
-        random.shuffle(data)  # debug
-        # data.sort()
+        data.sort()
         return data
 
     def _generate_people(self, data):
@@ -194,6 +195,40 @@ class FamilyTree:
                 cx[1].append(c_coords)
 
         return cxs
+
+    def _compress_surfs_vertically(self):
+        for i, (names_line, arrows_line) in enumerate(zip_longest(self.names_surf, self.arrows_surf, fillvalue=[])):
+            if not set(arrows_line).issubset([arrs["middle"], None]):
+                continue
+
+            while True:
+                if not names_line:
+                    del self.names_surf[i]
+                    del self.arrows_surf[i]
+                    names_line = self.names_surf[i]
+                    arrows_line = self.arrows_surf[i]
+                    continue
+
+                try:
+                    prev_arrows_line = self.arrows_surf[i-1]
+                    prev_names_line = self.names_surf[i-1]
+                except IndexError:
+                    break
+
+                for nam_c, prev_nam_c, prev_arr_c in zip_longest(names_line, prev_names_line, prev_arrows_line, fillvalue=None):
+                    p, q, r = nam_c is not None, prev_nam_c is not None, prev_arr_c is not None
+                    if p and q or p and r or q and p:
+                        break
+
+                else:
+                    del self.arrows_surf[i]
+                    self.names_surf[i-1] = self.names_surf[i-1] + names_line
+                    del self.names_surf[i]
+                    names_line = self.names_surf[i]
+                    arrows_line = self.arrows_surf[i]
+                    continue
+
+                break
 
 
 class Rel(Enum):
