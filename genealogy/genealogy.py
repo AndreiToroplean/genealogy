@@ -1,4 +1,4 @@
-from family_tree import FamilyTree
+from genealogy.family_tree import FamilyTree
 
 
 def main():

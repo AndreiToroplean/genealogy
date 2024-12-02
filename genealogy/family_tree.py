@@ -3,8 +3,8 @@ from enum import Enum
 from itertools import zip_longest
 from math import inf
 
-from person import Person
-from surface import Surface, SurfPos, ArrowsSurface, arrs
+from genealogy.person import Person
+from genealogy.surface import Surface, SurfPos, ArrowsSurface, arrs
 
 
 class FamilyTree:

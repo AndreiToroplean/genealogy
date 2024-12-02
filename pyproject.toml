@@ -1,0 +1,13 @@
+[project]
+name = "genealogy"
+version = "0.1.0"
+description = "A standard for encoding family trees and a script to draw them in ascii"
+authors = [{ name = "Andrei Toroplean", email = "andrei.toroplean@gmail.com" }]
+license = { text = "MIT" }
+
+[project.entry-points.console_scripts]
+genealogy = "genealogy.genealogy:main"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
