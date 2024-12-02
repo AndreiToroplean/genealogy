@@ -46,7 +46,7 @@ class FamilyTree:
     def _read_data(self):
         data = []
         is_data = False
-        with open("data.txt") as f:
+        with open("../genealogy-data/data.txt") as f:
             for line in f:
                 if line.strip().startswith("#"):
                     continue
