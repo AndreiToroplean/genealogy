@@ -11,8 +11,12 @@ class Person:
 
     @property
     def name(self):
-        return f"{self.first_name}{' ' + self.middle_name if self.middle_name else ''} {self.last_name}" \
-               f"{f' ne.e {self.maiden_name}' if self.maiden_name else ''}"
+        return (
+            f"{self.first_name}"
+            f"{' ' + self.middle_name if self.middle_name else ''}"
+            f" {self.last_name}"
+            f"{f' ne.e {self.maiden_name}' if self.maiden_name else ''}"
+        )
 
     @name.setter
     def name(self, name):
