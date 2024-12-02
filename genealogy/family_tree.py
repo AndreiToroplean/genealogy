@@ -8,7 +8,7 @@ from genealogy.surface import Surface, SurfPos, ArrowsSurface, arrs
 
 
 class FamilyTree:
-    def __init__(self):
+    def __init__(self, raw_data):
         random.seed(0)
 
         self._real_names = {}
@@ -22,7 +22,7 @@ class FamilyTree:
         self._arrows_surf = ArrowsSurface()
         self._surf = Surface()
 
-        data = self._read_data()
+        data = self._parse_data(raw_data)
         self._people = self._generate_people(data)
 
         self._draw_surf()
@@ -43,29 +43,32 @@ class FamilyTree:
         self._surf = self._names_surf + self._arrows_surf
         self._surf.add_line()
 
-    def _read_data(self):
+    def _parse_data(self, raw_data):
         data = []
-        is_data = False
-        with open("../genealogy-data/data.txt") as f:
-            for line in f:
-                if line.strip().startswith("#"):
-                    continue
+        is_data = False  # Whether the line represents relationship data, as opposed to IDs.
+        for line in raw_data.splitlines():
+            line = line.strip()
+            if line.startswith("#"):
+                continue
 
-                if not line.strip():
-                    is_data = True
-                    continue
+            if not line:
+                # After a line skip, we consider lines to be relationship data.
+                is_data = True
+                continue
 
-                if not is_data:
-                    id_, name = [s.strip() for s in line.split(":")]
-                    if id_ in self._real_names:
-                        raise Exception(f"IDs must be unique. '{id_}' is repeated at least twice. ")
+            if not is_data:
+                # Parse IDs:
+                id_, name = [s.strip() for s in line.split(":")]
+                if id_ in self._real_names:
+                    raise Exception(f"IDs must be unique. '{id_}' is repeated at least twice. ")
 
-                    self._real_names[id_] = name
-                    continue
+                self._real_names[id_] = name
+                continue
 
-                key, parent_id = line.split(":")
-                child_id, rel = key.split(",")
-                data.append((child_id.strip(), rel.strip(), parent_id.strip()))
+            # Parse relationships:
+            key, parent_id = line.split(":")
+            child_id, rel = key.split(",")
+            data.append((child_id.strip(), rel.strip(), parent_id.strip()))
         data.sort()
         return data
 
