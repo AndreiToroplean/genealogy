@@ -20,7 +20,20 @@ genealogy sample_data.txt
 Output:
 ```
 John Smith 
-    ╘═╦════════ Emily Smith
+    ╘═╦════════ Emily Smith ne.e Johnson
+      ║             ╘═╗
       ╚════════ James Smith
+                Sarah Johnson
+                    ╘═╣
+                Michael Johnson
+                    ╘═╬════════ Helen Johnson ne.e Brown
+                      ╚════════ Robert Johnson
 ```
-Meaning: "John Smith's parents are Emily Smith and James Smith".
+Meaning: 
+- John Smith's parents are Emily and James.
+- Emily's parents are Helen and Robert.
+- Emily has two siblings: Sarah and Michael (since we can see that they all share the same parents).
+
+N.B.:
+- Only single-line indicators (╘═) are actually pointing to the names.
+- Double-line ones (║) are to be understood as connected together, ignoring the names that appear "in front" of them.
