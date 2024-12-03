@@ -1,10 +1,10 @@
-import random
-from enum import Enum
 from itertools import zip_longest
 from math import inf
+import random
 
 from genealogy.person import Person
-from genealogy.surface import Surface, SurfPos, ArrowsSurface, arrs
+from genealogy.surface import ArrowsSurface, Surface, SurfPos
+from genealogy.utils import ARRS, Rel
 
 
 class FamilyTree:
@@ -301,10 +301,3 @@ class FamilyTree:
                 continue
 
             i += 1
-
-
-class Rel(Enum):
-    F = "father"
-    M = "mother"
-    AF = "adoptive father"
-    AM = "adoptive mother"
