@@ -1,5 +1,7 @@
 from itertools import zip_longest
 
+from genealogy.utils import ARRS, ARRS_ARITHMETIC
+
 
 class Surface(list):
     def draw(self, pos, iterable, *, up_to=False, no_overwrite=False):
@@ -57,7 +59,7 @@ class SurfLine(list):
             prev_char = self[index + i]
             if prev_char is not None:
                 has_collided = True
-                if no_overwrite and char == arrs["co"]:
+                if no_overwrite and char == ARRS["co"]:
                     continue
             self[index + i] = char
         return has_collided
@@ -77,43 +79,6 @@ class SurfLine(list):
         return "".join([char if char is not None else " " for char in self])
 
 
-arrs = {
-        "tail": "╘═",
-        "head": "═ ",
-        "co": "═",
-        "right": "╞",
-        "left": "╡",
-        "middle": "║",
-        "start": "╥",
-        "end": "╨",
-        "left_start": "╗",
-        "left_end": "╝",
-        "left_middle": "╣",
-        "right_start": "╔",
-        "right_end": "╚",
-        "right_middle": "╠",
-        "both_start": "╦",
-        "both_end": "╩",
-        "both_middle": "╬",
-        }
-arrs_arithmetic = {
-    (arrs["start"], arrs["left"]): arrs["left_start"],
-    (arrs["start"], arrs["right"]): arrs["right_start"],
-    (arrs["end"], arrs["left"]): arrs["left_end"],
-    (arrs["end"], arrs["right"]): arrs["right_end"],
-    (arrs["middle"], arrs["left"]): arrs["left_middle"],
-    (arrs["middle"], arrs["right"]): arrs["right_middle"],
-    (arrs["right_start"], arrs["left"]): arrs["both_start"],
-    (arrs["right_end"], arrs["left"]): arrs["both_end"],
-    (arrs["right_middle"], arrs["left"]): arrs["both_middle"],
-    (arrs["left_start"], arrs["right"]): arrs["both_start"],
-    (arrs["left_end"], arrs["right"]): arrs["both_end"],
-    (arrs["left_middle"], arrs["right"]): arrs["both_middle"],
-    (arrs["co"], arrs["right"]): arrs["co"],
-    (arrs["co"], arrs["left"]): arrs["co"],
-    }
-
-
 class ArrowsSurface(Surface):
     def draw_connections(self, cxs, names_surf):
         for gen, gen_cxs in enumerate(cxs):
@@ -130,26 +95,26 @@ class ArrowsSurface(Surface):
             pos = SurfPos.from_gen(line, gen).co_right(channel)
             if line == start:
                 if line == end:
-                    self.draw(pos, arrs["co"])
+                    self.draw(pos, ARRS["co"])
                     continue
-                self.draw(pos, arrs["start"])
+                self.draw(pos, ARRS["start"])
             elif line == end:
-                self.draw(pos, arrs["end"])
+                self.draw(pos, ARRS["end"])
             else:
-                self.draw(pos, arrs["middle"])
+                self.draw(pos, ARRS["middle"])
 
     def _draw_child_co(self, pos, channel):
         co_start_pos = pos.co_tail
         co_end_pos = pos.co_right(channel)
-        co_len = co_end_pos.index - co_start_pos.index - len(arrs["tail"])
-        arr = arrs["tail"] + arrs["co"] * co_len + self._co_char(co_end_pos, arrs["left"])
+        co_len = co_end_pos.index - co_start_pos.index - len(ARRS["tail"])
+        arr = ARRS["tail"] + ARRS["co"] * co_len + self._co_char(co_end_pos, ARRS["left"])
         self.draw(co_start_pos, arr, no_overwrite=True)
 
     def _draw_parent_co(self, p_pos, c_gen, channel):
         co_start_pos = p_pos.co_left(channel, c_gen)
         co_end_pos = p_pos.co_head
-        co_len = co_end_pos.index - co_start_pos.index - len(arrs["head"])
-        arr = self._co_char(co_start_pos, arrs["right"]) + arrs["co"] * (co_len - 1) + arrs["head"]
+        co_len = co_end_pos.index - co_start_pos.index - len(ARRS["head"])
+        arr = self._co_char(co_start_pos, ARRS["right"]) + ARRS["co"] * (co_len - 1) + ARRS["head"]
         self.draw(co_start_pos, arr, no_overwrite=True)
 
     def _co_char(self, pos, co_char):
@@ -161,13 +126,13 @@ class ArrowsSurface(Surface):
         if prev_char is None:
             return co_char
 
-        return arrs_arithmetic[(prev_char, co_char)]
+        return ARRS_ARITHMETIC[(prev_char, co_char)]
 
 
 class SurfPos(list):
     _gen_shift = 16
     _start_shift = 4
-    _first_channel_shift = _start_shift + len(arrs["tail"])
+    _first_channel_shift = _start_shift + len(ARRS["tail"])
     _add_channel_shift = 2
 
     @classmethod
