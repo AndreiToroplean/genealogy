@@ -1,4 +1,4 @@
-from genealogy.family_tree import FamilyTree
+from genealogy.family_tree_renderer import FamilyTreeRenderer
 
 
 class TestFamilyTree:
@@ -8,5 +8,5 @@ class TestFamilyTree:
         with open("tests/expected_family_tree_as_str.txt", encoding="utf-8") as f:
             expected = f.read()
 
-        family_tree = FamilyTree(data)
-        assert family_tree.as_str == expected
+        renderer = FamilyTreeRenderer(data)
+        assert renderer.render() == expected

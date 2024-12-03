@@ -1,6 +1,6 @@
 import argparse
 
-from genealogy.family_tree import FamilyTree
+from genealogy.family_tree_renderer import FamilyTreeRenderer
 
 
 def main():
@@ -11,11 +11,12 @@ def main():
 
     with open(args.data) as f:
         data = f.read()
-    fam_tree = FamilyTree(data)
-    fam_tree.draw()
+    renderer = FamilyTreeRenderer(data)
+    rendered_tree = renderer.render()
+    print(rendered_tree)
     if args.output:
         with open(args.output, "w", encoding="utf-8") as f:
-            f.write(fam_tree.as_str)
+            f.write(rendered_tree)
 
 
 if __name__ == "__main__":
