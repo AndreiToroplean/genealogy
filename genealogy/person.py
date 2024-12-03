@@ -11,18 +11,8 @@ class Person:
         self.middle_name = ""
         self.maiden_name = ""
 
-    @property
-    def name(self):
-        return (
-            f"{self.first_name}"
-            f"{' ' + self.middle_name if self.middle_name else ''}"
-            f" {self.last_name}"
-            f"{f' ne.e {self.maiden_name}' if self.maiden_name else ''}"
-        )
-
-    @name.setter
-    def name(self, name):
-        names = name.split()
+    def set_names_from_str(self, name_str):
+        names = name_str.split()
         last = names.pop()
         if last.startswith("(") and last.endswith(")"):
             self.maiden_name = last[1:-1]
@@ -31,6 +21,15 @@ class Person:
             self.last_name = last
         self.first_name = names.pop(0)
         self.middle_name = " ".join(names)
+
+    @property
+    def name(self):
+        return (
+            f"{self.first_name}"
+            f"{' ' + self.middle_name if self.middle_name else ''}"
+            f" {self.last_name}"
+            f"{f' ne.e {self.maiden_name}' if self.maiden_name else ''}"
+        )
 
     def __repr__(self):
         return f"Person({{'Name': {self.name}, " \
