@@ -8,10 +8,9 @@ from genealogy.utils import ARRS, Rel
 
 
 class FamilyTree:
-    def __init__(self, raw_data):
+    def __init__(self, data):
         random.seed(0)
 
-        self._real_names = {}
         self._people: list[Person] = []
         self._order = []
         self._gens = []
@@ -22,8 +21,8 @@ class FamilyTree:
         self._arrows_surf = ArrowsSurface()
         self._surf = Surface()
 
-        data = self._parse_data(raw_data)
-        self._people = self._generate_people(data)
+        people_dict, relationships = self._parse_data(data)
+        self._people = self._generate_people(people_dict, relationships)
 
         self._draw_surf()
 
@@ -43,10 +42,12 @@ class FamilyTree:
         self._surf = self._names_surf + self._arrows_surf
         self._surf.add_line()
 
-    def _parse_data(self, raw_data):
-        data = []
+    @staticmethod
+    def _parse_data(data):
+        people_dict = {}
+        relationships = []
         is_data = False  # Whether the line represents relationship data, as opposed to IDs.
-        for line in raw_data.splitlines():
+        for line in data.splitlines():
             line = line.strip()
             if line.startswith("#"):
                 continue
@@ -57,49 +58,37 @@ class FamilyTree:
                 continue
 
             if not is_data:
-                # Parse IDs:
+                # Parse IDs and create Person objects
                 id_, name = [s.strip() for s in line.split(":")]
-                if id_ in self._real_names:
-                    raise Exception(f"IDs must be unique. '{id_}' is repeated at least twice. ")
+                if id_ in people_dict:
+                    raise Exception(f"IDs must be unique. '{id_}' is repeated.")
+                person = Person(id_)
+                person.set_names_from_str(name)
+                people_dict[id_] = person
+            else:
+                # Parse relationships
+                key, parent_id = line.split(":")
+                child_id, rel = key.split(",")
+                relationships.append((child_id.strip(), rel.strip(), parent_id.strip()))
+        relationships.sort()
+        return people_dict, relationships
 
-                self._real_names[id_] = name
-                continue
-
-            # Parse relationships:
-            key, parent_id = line.split(":")
-            child_id, rel = key.split(",")
-            data.append((child_id.strip(), rel.strip(), parent_id.strip()))
-        data.sort()
-        return data
-
-    def _generate_people(self, data):
-        people_dict = {}
-        for child_id, rel, parent_id in data:
-            # Create/get child
-            if child_id not in people_dict:
+    @staticmethod
+    def _generate_people(people_dict, relationships):
+        for child_id, rel, parent_id in relationships:
+            # Get or create child
+            child = people_dict.get(child_id)
+            if not child:
                 child = Person(child_id)
+                child.set_names_from_str(child_id)
                 people_dict[child_id] = child
-                try:
-                    name = self._real_names[child_id]
-                except KeyError:
-                    self._real_names[child_id] = child_id
-                    name = child_id
-                child.set_names_from_str(name)
-            else:
-                child = people_dict[child_id]
-                
-            # Create/get parent
-            if parent_id not in people_dict:
+
+            # Get or create parent
+            parent = people_dict.get(parent_id)
+            if not parent:
                 parent = Person(parent_id)
+                parent.set_names_from_str(parent_id)
                 people_dict[parent_id] = parent
-                try:
-                    name = self._real_names[parent_id]
-                except KeyError:
-                    self._real_names[parent_id] = parent_id
-                    name = parent_id
-                parent.set_names_from_str(name)
-            else:
-                parent = people_dict[parent_id]
 
             # Add relationships
             child.parents[Rel[rel]] = parent
