@@ -46,30 +46,35 @@ class FamilyTree:
     def _parse_data(data):
         people_dict = {}
         relationships = []
-        is_data = False  # Whether the line represents relationship data, as opposed to IDs.
-        for line in data.splitlines():
+        lines = iter(data.splitlines())
+
+        # Parse IDs and create Person objects
+        for line in lines:
             line = line.strip()
             if line.startswith("#"):
                 continue
 
             if not line:
-                # After a line skip, we consider lines to be relationship data.
-                is_data = True
+                # After a line skip, we stop parsing IDs
+                break
+
+            id_, name = [s.strip() for s in line.split(":")]
+            if id_ in people_dict:
+                raise Exception(f"IDs must be unique. '{id_}' is repeated.")
+            person = Person(id_)
+            person.set_names_from_str(name)
+            people_dict[id_] = person
+
+        # Parse relationships
+        for line in lines:
+            line = line.strip()
+            if line.startswith("#") or not line:
                 continue
 
-            if not is_data:
-                # Parse IDs and create Person objects
-                id_, name = [s.strip() for s in line.split(":")]
-                if id_ in people_dict:
-                    raise Exception(f"IDs must be unique. '{id_}' is repeated.")
-                person = Person(id_)
-                person.set_names_from_str(name)
-                people_dict[id_] = person
-            else:
-                # Parse relationships
-                key, parent_id = line.split(":")
-                child_id, rel = key.split(",")
-                relationships.append((child_id.strip(), rel.strip(), parent_id.strip()))
+            key, parent_id = line.split(":")
+            child_id, rel = key.split(",")
+            relationships.append((child_id.strip(), rel.strip(), parent_id.strip()))
+
         relationships.sort()
         return people_dict, relationships
 
