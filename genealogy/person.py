@@ -1,9 +1,11 @@
+from .utils import Rel
+
+
 class Person:
     def __init__(self, id):
         self.id = id
-        self.parents = []
-        self.rels = []
-        self.children = []
+        self.parents: dict[Rel, Person] = {}
+        self.children: list[Person] = []
         self.first_name = ""
         self.last_name = ""
         self.middle_name = ""
@@ -32,7 +34,7 @@ class Person:
 
     def __repr__(self):
         return f"Person({{'Name': {self.name}, " \
-               f"'Parents': {[(p.name, rel) for p, rel in zip(self.rels, self.parents)]}, " \
+               f"'Parents': {[(p.name, rel) for rel, p in self.parents.items()]}, " \
                f"'Children': {[c.name for c in self.children]}}})"
 
     def __eq__(self, other):
