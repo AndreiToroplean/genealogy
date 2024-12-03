@@ -202,7 +202,7 @@ class FamilyTree:
         for person, gen in zip(self._order, self._gens):
             line += 1 if gen > prev_gen else 2
             prev_gen = gen
-            self._names_surf.draw(SurfPos.from_gen(line, gen), person.name + " ")
+            self._names_surf.draw(SurfPos.from_gen(line, gen), person.name)
             self._coords[person.id] = SurfPos.from_gen(line, gen)
 
     def _draw_arrows_surf(self):
