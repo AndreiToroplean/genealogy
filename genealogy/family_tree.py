@@ -21,8 +21,7 @@ class FamilyTree:
         self._arrows_surf = ArrowsSurface()
         self._surf = Surface()
 
-        people_dict, relationships = self._parse_data(data)
-        self._people = self._generate_people(people_dict, relationships)
+        self._people = self._generate_people(data)
 
         self._draw_surf()
 
@@ -43,9 +42,8 @@ class FamilyTree:
         self._surf.add_line()
 
     @staticmethod
-    def _parse_data(data):
+    def _generate_people(data):
         people_dict = {}
-        relationships = []
         lines = iter(data.splitlines())
 
         # Parse IDs and create Person objects
@@ -65,7 +63,7 @@ class FamilyTree:
             person.set_names_from_str(name)
             people_dict[id_] = person
 
-        # Parse relationships
+        # Parse relationships and set them on Person objects
         for line in lines:
             line = line.strip()
             if line.startswith("#") or not line:
@@ -73,14 +71,10 @@ class FamilyTree:
 
             key, parent_id = line.split(":")
             child_id, rel = key.split(",")
-            relationships.append((child_id.strip(), rel.strip(), parent_id.strip()))
+            child_id = child_id.strip()
+            rel = rel.strip()
+            parent_id = parent_id.strip()
 
-        relationships.sort()
-        return people_dict, relationships
-
-    @staticmethod
-    def _generate_people(people_dict, relationships):
-        for child_id, rel, parent_id in relationships:
             # Get or create child
             child = people_dict.get(child_id)
             if not child:
@@ -99,7 +93,7 @@ class FamilyTree:
             child.parents[Rel[rel]] = parent
             parent.children.append(child)
 
-        return sorted(people_dict.values(), key=lambda p: (p.last_name, p.maiden_name))
+        return sorted(people_dict.values())
 
     def _p_dfs(self, person, visited):
         if person in visited: return False
