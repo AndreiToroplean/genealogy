@@ -8,6 +8,9 @@ license = { text = "MIT" }
 [project.entry-points.console_scripts]
 genealogy = "genealogy.genealogy:main"
 
+[project.optional-dependencies]
+test = ["pytest"]
+
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
