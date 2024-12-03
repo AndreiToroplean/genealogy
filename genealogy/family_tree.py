@@ -12,7 +12,7 @@ class FamilyTree:
         random.seed(0)
 
         self._real_names = {}
-        self._people = []
+        self._people: list[Person] = []
         self._order = []
         self._gens = []
         self._coords = {}
@@ -75,6 +75,7 @@ class FamilyTree:
     def _generate_people(self, data):
         people_dict = {}
         for child_id, rel, parent_id in data:
+            # Create/get child
             if child_id not in people_dict:
                 child = Person(child_id)
                 people_dict[child_id] = child
@@ -86,6 +87,8 @@ class FamilyTree:
                 child.name = name
             else:
                 child = people_dict[child_id]
+                
+            # Create/get parent
             if parent_id not in people_dict:
                 parent = Person(parent_id)
                 people_dict[parent_id] = parent
@@ -98,9 +101,8 @@ class FamilyTree:
             else:
                 parent = people_dict[parent_id]
 
-            child.parents.append(parent)
-            child.rels.append(Rel[rel])
-
+            # Add relationships
+            child.parents[Rel[rel]] = parent
             parent.children.append(child)
 
         return sorted(people_dict.values(), key=lambda p: (p.last_name, p.maiden_name))
@@ -109,7 +111,7 @@ class FamilyTree:
         if person in visited: return False
         visited.append(person)
 
-        for parent in person.parents:
+        for parent in person.parents.values():
             r = self._p_dfs(parent, visited)
             if not r: continue
             self._order.append(parent)
@@ -164,7 +166,7 @@ class FamilyTree:
             if random.random() < p_skip:
                 continue
             for j, pot_parent in enumerate(self._order[i + 1:], start=i + 1):
-                if pot_parent in person.parents:
+                if pot_parent in person.parents.values():
                     break
             else:
                 if skip_if_not_found:
@@ -187,7 +189,7 @@ class FamilyTree:
 
         for i, person in zip(range(len(self._order) - 1, -1, -1), reversed(self._order)):
             min_gen = inf
-            for parent in person.parents:
+            for parent in person.parents.values():
                 for j, pot_parent in enumerate(self._order[i:], start=i):
                     if pot_parent == parent:
                         min_gen = min(min_gen, self._gens[j])
@@ -237,15 +239,14 @@ class FamilyTree:
     def _generate_cxs(self):
         cxs = [{} for _ in set(self._gens)]
         for person, gen in zip(self._order, self._gens):
-            parents = person.parents
-            if not parents:
+            if not person.parents.values():
                 continue
 
             c_coords = self._coords[person.id] + [1, 0]
-            p_coords = [self._coords[parent.id] for parent in parents]
+            p_coords = [self._coords[parent.id] for parent in person.parents.values()]
 
             gen_cxs = cxs[gen]
-            couple_id = tuple(sorted([parent.id for parent in parents]))
+            couple_id = tuple(sorted([parent.id for parent in person.parents.values()]))
             try:
                 cx = gen_cxs[couple_id]
             except KeyError:
@@ -273,7 +274,7 @@ class FamilyTree:
             if names_ended and arrows_ended:
                 break
 
-            if not set(arrows_line).issubset([arrs["middle"], None]):
+            if not set(arrows_line).issubset([ARRS["middle"], None]):
                 i += 1
                 continue
 
