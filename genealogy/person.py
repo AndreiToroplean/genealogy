@@ -2,14 +2,26 @@ from .utils import Rel
 
 
 class Person:
-    def __init__(self, id):
+    NEE = " ne.e "  # Class constant for maiden name separator
+
+    def __init__(self, id, name="", parents=None, children=None):
         self.id = id
-        self.parents: dict[Rel, Person] = {}
-        self.children: list[Person] = []
         self.first_name = ""
         self.last_name = ""
         self.middle_name = ""
         self.maiden_name = ""
+        if name:
+            self.name = name
+        self.parents: dict[Rel, Person] = parents if parents is not None else {}
+        self.children: list[Person] = children if children is not None else []
+
+    def __repr__(self):
+        parents_repr = {rel.value: parent.id for rel, parent in self.parents.items()}
+        children_repr = [child.id for child in self.children]
+        return (
+            f"Person(id={self.id!r}, name={self.name!r}, "
+            f"parents={parents_repr!r}, children={children_repr!r})"
+        )
 
     def set_names_from_str(self, name_str):
         names = name_str.split()
@@ -28,15 +40,21 @@ class Person:
             f"{self.first_name}"
             f"{' ' + self.middle_name if self.middle_name else ''}"
             f" {self.last_name}"
-            f"{f' ne.e {self.maiden_name}' if self.maiden_name else ''}"
+            f"{f'{self.NEE}{self.maiden_name}' if self.maiden_name else ''}"
         )
 
-    def __repr__(self):
-        return (
-            f"Person({{'Name': {self.name}, "
-            f"'Parents': {[(p.name, rel) for rel, p in self.parents.items()]}, "
-            f"'Children': {[c.name for c in self.children]}}})"
-        )
+    @name.setter
+    def name(self, value):
+        if self.NEE in value:
+            name_part, maiden_name = value.split(self.NEE, 1)
+            self.maiden_name = maiden_name.strip()
+        else:
+            name_part = value
+            self.maiden_name = ''
+        names = name_part.strip().split()
+        self.first_name = names[0] if names else ''
+        self.last_name = names[-1] if len(names) > 1 else ''
+        self.middle_name = ' '.join(names[1:-1]) if len(names) > 2 else ''
 
     def __eq__(self, other):
         return self.id == other.id
