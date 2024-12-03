@@ -84,7 +84,7 @@ class FamilyTree:
                 except KeyError:
                     self._real_names[child_id] = child_id
                     name = child_id
-                child.name = name
+                child.set_names_from_str(name)
             else:
                 child = people_dict[child_id]
                 
@@ -97,7 +97,7 @@ class FamilyTree:
                 except KeyError:
                     self._real_names[parent_id] = parent_id
                     name = parent_id
-                parent.name = name
+                parent.set_names_from_str(name)
             else:
                 parent = people_dict[parent_id]
 

@@ -20,9 +20,8 @@ class Person:
             f"{f' ne.e {self.maiden_name}' if self.maiden_name else ''}"
         )
 
-    @name.setter
-    def name(self, name):
-        names = name.split()
+    def set_names_from_str(self, name_str):
+        names = name_str.split()
         last = names.pop()
         if last.startswith("(") and last.endswith(")"):
             self.maiden_name = last[1:-1]
