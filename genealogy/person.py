@@ -32,9 +32,17 @@ class Person:
         )
 
     def __repr__(self):
-        return f"Person({{'Name': {self.name}, " \
-               f"'Parents': {[(p.name, rel) for rel, p in self.parents.items()]}, " \
-               f"'Children': {[c.name for c in self.children]}}})"
+        return (
+            f"Person({{'Name': {self.name}, "
+            f"'Parents': {[(p.name, rel) for rel, p in self.parents.items()]}, "
+            f"'Children': {[c.name for c in self.children]}}})"
+        )
 
     def __eq__(self, other):
         return self.id == other.id
+
+    def __lt__(self, other):
+        return (
+            (self.last_name, self.maiden_name, self.first_name, self.middle_name)
+            < (other.last_name, other.maiden_name, other.first_name, other.middle_name)
+        )
