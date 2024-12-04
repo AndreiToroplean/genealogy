@@ -17,7 +17,6 @@ class FamilyTree:
         random.seed(0)
 
         self._people: list[Person] = list(people)
-        self._gens = []
         self._coords = {}
 
         self._cxs = []
@@ -40,7 +39,7 @@ class FamilyTree:
 
     def _draw_surf(self):
         self._perform_augmented_top_sort()
-        self._generate_gens()
+        self._compute_generations()
         self._draw_names_surf()
         self._draw_arrows_surf()
         self._compress_surfs_vertically()
@@ -174,34 +173,32 @@ class FamilyTree:
             j = round(i + (j - 1 - i) * force)
             self._people.insert(j, self._people.pop(i))
 
-    def _generate_gens(self):
-        self._gens = [0 for _ in self._people]
+    def _compute_generations(self):
         for i, person in enumerate(self._people):
             for child in person.children:
-                for j, pot_child in enumerate(self._people[:i]):
+                for pot_child in self._people[:i]:
                     if pot_child == child:
-                        break
+                        person.generation = max(person.generation, pot_child.generation + 1)
                 else:
                     continue
-                self._gens[i] = max(self._gens[i], self._gens[j] + 1)
 
         for i, person in zip(range(len(self._people) - 1, -1, -1), reversed(self._people)):
             min_gen = inf
             for parent in person.parents.values():
-                for j, pot_parent in enumerate(self._people[i:], start=i):
+                for pot_parent in self._people[i:]:
                     if pot_parent == parent:
-                        min_gen = min(min_gen, self._gens[j])
+                        min_gen = min(min_gen, pot_parent.generation)
             if min_gen != inf:
-                self._gens[i] = min_gen - 1
+                person.generation = min_gen - 1
 
     def _draw_names_surf(self):
         prev_gen = -1
         line = 0
-        for person, gen in zip(self._people, self._gens):
-            line += 1 if gen > prev_gen else 2
-            prev_gen = gen
-            self._names_surf.draw(SurfPos.from_gen(line, gen), person.name)
-            self._coords[person.id] = SurfPos.from_gen(line, gen)
+        for person in self._people:
+            line += 1 if person.generation > prev_gen else 2
+            prev_gen = person.generation
+            self._names_surf.draw(SurfPos.from_gen(line, person.generation), person.name)
+            self._coords[person.id] = SurfPos.from_gen(line, person.generation)
 
     def _draw_arrows_surf(self):
         cxs = self._generate_cxs()
@@ -235,15 +232,15 @@ class FamilyTree:
         return cxs
 
     def _generate_cxs(self):
-        cxs = [{} for _ in set(self._gens)]
-        for person, gen in zip(self._people, self._gens):
+        cxs = [{} for _ in set(person.generation for person in self._people)]
+        for person in self._people:
             if not person.parents.values():
                 continue
 
             c_coords = self._coords[person.id] + [1, 0]
             p_coords = [self._coords[parent.id] for parent in person.parents.values()]
 
-            gen_cxs = cxs[gen]
+            gen_cxs = cxs[person.generation]
             couple_id = tuple(sorted([parent.id for parent in person.parents.values()]))
             try:
                 cx = gen_cxs[couple_id]

@@ -4,7 +4,7 @@ from .utils import Rel
 class Person:
     NEE = " ne.e "  # Class constant for maiden name separator
 
-    def __init__(self, id, name="", parents=None, children=None):
+    def __init__(self, id, name="", parents=None, children=None, generation=0):
         self.id = id
         self.first_name = ""
         self.last_name = ""
@@ -14,13 +14,17 @@ class Person:
             self.name = name
         self.parents: dict[Rel, Person] = parents if parents is not None else {}
         self.children: list[Person] = children if children is not None else []
+        self.generation = generation
 
     def __repr__(self):
         parents_repr = {rel.value: parent.id for rel, parent in self.parents.items()}
         children_repr = [child.id for child in self.children]
         return (
-            f"Person(id={self.id!r}, name={self.name!r}, "
-            f"parents={parents_repr!r}, children={children_repr!r})"
+            f"Person(id={self.id!r}"
+            f", name={self.name!r}"
+            f", parents={parents_repr!r}"
+            f", children={children_repr!r}"
+            f", generation={self.generation!r})"
         )
 
     def set_names_from_str(self, name_str):
