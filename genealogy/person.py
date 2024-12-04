@@ -27,17 +27,6 @@ class Person:
             f", generation={self.generation!r})"
         )
 
-    def set_names_from_str(self, name_str):
-        names = name_str.split()
-        last = names.pop()
-        if last.startswith("(") and last.endswith(")"):
-            self.maiden_name = last[1:-1]
-            self.last_name = names.pop()
-        else:
-            self.last_name = last
-        self.first_name = names.pop(0)
-        self.middle_name = " ".join(names)
-
     @property
     def name(self):
         return (
