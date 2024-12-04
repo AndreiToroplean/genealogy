@@ -57,3 +57,23 @@ class Person:
             (self.last_name, self.maiden_name, self.first_name, self.middle_name)
             < (other.last_name, other.maiden_name, other.first_name, other.middle_name)
         )
+
+    def p_dfs(self, visited, func):
+        if self in visited: return False
+        visited.append(self)
+
+        for parent in self.parents.values():
+            r = parent.p_dfs(visited, func)
+            if not r: continue
+            func(parent)
+        return True
+
+    def c_dfs(self, visited, func):
+        if self in visited: return False
+        visited.append(self)
+
+        for child in self.children:
+            r = child.c_dfs(visited, func)
+            if not r: continue
+            func(child)
+            return True

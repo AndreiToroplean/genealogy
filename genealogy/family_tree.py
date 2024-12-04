@@ -68,7 +68,7 @@ class FamilyTree:
 
             def append(node):
                 sorted_nodes.append(node)
-            self._p_dfs(node, visited, append)
+            node.p_dfs(visited, append)
             append(node)
 
         sorted_nodes.reverse()
@@ -77,28 +77,6 @@ class FamilyTree:
         for i in range(n_iterations):
             self._pull_children_down(p_skip=0.0, skip_if_not_found=True)
             self._pull_parents_up(p_skip=0.0, skip_if_not_found=True)
-
-    @staticmethod
-    def _p_dfs(person, visited, func):
-        if person in visited: return False
-        visited.append(person)
-
-        for parent in person.parents.values():
-            r = FamilyTree._p_dfs(parent, visited, func)
-            if not r: continue
-            func(parent)
-        return True
-
-    @staticmethod
-    def _c_dfs(person, visited, func):
-        if person in visited: return False
-        visited.append(person)
-
-        for child in person.children:
-            r = FamilyTree._c_dfs(child, visited, func)
-            if not r: continue
-            func(child)
-            return True
 
     def _pull_parents_up(self, *, force=1.0, p_skip=0.0, skip_if_not_found=False):
         for i, person in enumerate(self.people):
