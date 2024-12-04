@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from itertools import zip_longest
 from math import inf
 import random
@@ -8,10 +9,14 @@ from genealogy.utils import ARRS, Rel
 
 
 class FamilyTree:
-    def __init__(self, data):
+    @classmethod
+    def from_data(cls, data: str) -> "FamilyTree":
+        return cls(cls._generate_people(data))
+
+    def __init__(self, people: Iterable[Person]):
         random.seed(0)
 
-        self._people: list[Person] = []
+        self._people: list[Person] = list(people)
         self._order = []
         self._gens = []
         self._coords = {}
@@ -20,8 +25,6 @@ class FamilyTree:
         self._names_surf = Surface()
         self._arrows_surf = ArrowsSurface()
         self._surf = Surface()
-
-        self._people = self._generate_people(data)
 
         self._draw_surf()
 
