@@ -40,7 +40,7 @@ class FamilyTree:
         return self._surf.as_str
 
     def _draw_surf(self):
-        self._augmented_top_sort()
+        self._perform_augmented_top_sort()
         self._generate_gens()
         self._draw_names_surf()
         self._draw_arrows_surf()
@@ -102,6 +102,25 @@ class FamilyTree:
 
         return sorted(people_dict.values())
 
+    def _perform_augmented_top_sort(self, n_iterations=64):
+        visited = []
+        while True:
+            for node in self._people:
+                if node not in visited:
+                    break
+
+            else:
+                break
+
+            self._p_dfs(node, visited)
+            self._order.append(node)
+
+        self._order.reverse()
+
+        for i in range(n_iterations):
+            self._pull_children_down(p_skip=0.0, skip_if_not_found=True)
+            self._pull_parents_up(p_skip=0.0, skip_if_not_found=True)
+
     def _p_dfs(self, person, visited):
         if person in visited: return False
         visited.append(person)
@@ -121,25 +140,6 @@ class FamilyTree:
             if not r: continue
             self._order.append(child)
             return True
-
-    def _augmented_top_sort(self, n_iterations=64):
-        visited = []
-        while True:
-            for node in self._people:
-                if node not in visited:
-                    break
-
-            else:
-                break
-
-            self._p_dfs(node, visited)
-            self._order.append(node)
-
-        self._order.reverse()
-
-        for i in range(n_iterations):
-            self._pull_children_down(p_skip=0.0, skip_if_not_found=True)
-            self._pull_parents_up(p_skip=0.0, skip_if_not_found=True)
 
     def _pull_parents_up(self, *, force=1.0, p_skip=0.0, skip_if_not_found=False):
         for i, person in enumerate(self._order):
