@@ -1,0 +1,9 @@
+FamilyTree([
+    Person(id='John', name='John Smith', parents={'father': 'James', 'mother': 'Emily'}, children=[], generation=0),
+    Person(id='Emily', name='Emily Smith ne.e Johnson', parents={'father': 'Robert', 'mother': 'Helen'}, children=['John'], generation=1),
+    Person(id='James', name='James Smith', parents={}, children=['John'], generation=1),
+    Person(id='Sarah', name='Sarah Johnson', parents={'father': 'Robert', 'mother': 'Helen'}, children=[], generation=1),
+    Person(id='Michael', name='Michael Johnson', parents={'father': 'Robert', 'mother': 'Helen'}, children=[], generation=1),
+    Person(id='Helen', name='Helen Johnson ne.e Brown', parents={}, children=['Emily', 'Sarah', 'Michael'], generation=2),
+    Person(id='Robert', name='Robert Johnson', parents={}, children=['Emily', 'Sarah', 'Michael'], generation=2)
+])
