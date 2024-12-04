@@ -28,6 +28,10 @@ class FamilyTree:
 
         self._draw_surf()
 
+    def __repr__(self):
+        people_str = ",\n    ".join([repr(person) for person in self._people])
+        return f"FamilyTree([\n    {people_str}\n])"
+
     def draw(self):
         print(self._surf.as_str)
 
