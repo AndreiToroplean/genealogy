@@ -13,17 +13,23 @@ class FamilyTreeRenderer:
     def __init__(self, family_tree: FamilyTree):
         self.family_tree = family_tree
 
+        self._coords = None
+        self._cxs = None
+        self._names_surf = None
+        self._arrows_surf = None
+        self._surf = None
+
+    def render(self) -> str:
+        self._draw_surf()
+        return self._surf.as_str
+
+    def _draw_surf(self):
         self._coords = {}
         self._cxs = []
         self._names_surf = Surface()
         self._arrows_surf = ArrowsSurface()
         self._surf = Surface()
-        self._draw_surf()
 
-    def render(self) -> str:
-        return self._surf.as_str
-
-    def _draw_surf(self):
         self._draw_names_surf()
         self._draw_arrows_surf()
         self._compress_surfs_vertically()
