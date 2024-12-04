@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+import json
 from math import inf
 import random
 
@@ -11,12 +12,48 @@ class FamilyTree:
     def from_data(cls, data: str) -> "FamilyTree":
         return cls(cls._generate_people(data))
 
+    @classmethod
+    def from_json(cls, json_data: str) -> "FamilyTree":
+        data = json.loads(json_data)
+        people_dict = {}
+        
+        # Create all Person objects
+        for id_, name in data["people"].items():
+            person = Person(id_, name)
+            people_dict[id_] = person
+            
+        # Set up relationships
+        for child_id, parents in data["relationships"].items():
+            child = people_dict[child_id]
+            for rel, parent_id in parents.items():
+                parent = people_dict[parent_id]
+                child.parents[Rel[rel]] = parent
+                parent.children.append(child)
+                
+        return cls(people_dict.values())
+
     def __init__(self, people: Iterable[Person]):
         random.seed(0)
 
-        self.people: list[Person] = list(people)
+        self.people: list[Person] = sorted(people)
         self._perform_augmented_top_sort()
         self._compute_generations()
+
+    def to_json(self) -> str:
+        data = {
+            "people": {
+                person.id: person.name for person in self.people
+            },
+            "relationships": {
+                person.id: {
+                    rel.name: parent.id 
+                    for rel, parent in person.parents.items()
+                }
+                for person in self.people
+                if person.parents
+            }
+        }
+        return json.dumps(data, indent=2)
 
     def __repr__(self):
         people_str = ",\n    ".join([repr(person) for person in self.people])
@@ -74,7 +111,7 @@ class FamilyTree:
             child.parents[Rel[rel]] = parent
             parent.children.append(child)
 
-        return sorted(people_dict.values())
+        return people_dict.values()
 
     def _perform_augmented_top_sort(self, n_iterations=64):
         visited = []

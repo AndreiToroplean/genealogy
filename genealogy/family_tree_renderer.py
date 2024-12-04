@@ -10,6 +10,10 @@ class FamilyTreeRenderer:
     def from_data(cls, family_tree_data: str) -> "FamilyTreeRenderer":
         return cls(FamilyTree.from_data(family_tree_data))
 
+    @classmethod
+    def from_json(cls, family_tree_json: str) -> "FamilyTreeRenderer":
+        return cls(FamilyTree.from_json(family_tree_json))
+
     def __init__(self, family_tree: FamilyTree):
         self.family_tree = family_tree
 
