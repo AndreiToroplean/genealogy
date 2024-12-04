@@ -6,8 +6,12 @@ from genealogy.utils import ARRS
 
 
 class FamilyTreeRenderer:
-    def __init__(self, family_tree_data: str):
-        self.family_tree = FamilyTree.from_data(family_tree_data)
+    @classmethod
+    def from_data(cls, family_tree_data: str) -> "FamilyTreeRenderer":
+        return cls(FamilyTree.from_data(family_tree_data))
+
+    def __init__(self, family_tree: FamilyTree):
+        self.family_tree = family_tree
 
         self._coords = {}
         self._cxs = []
