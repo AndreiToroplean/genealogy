@@ -11,7 +11,7 @@ def main():
 
     with open(args.data) as f:
         data = f.read()
-    renderer = FamilyTreeRenderer(data)
+    renderer = FamilyTreeRenderer.from_data(data)
     rendered_tree = renderer.render()
     print(rendered_tree)
     if args.output:
