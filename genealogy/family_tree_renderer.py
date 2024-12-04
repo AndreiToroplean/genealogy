@@ -7,10 +7,6 @@ from genealogy.utils import ARRS
 
 class FamilyTreeRenderer:
     @classmethod
-    def from_data(cls, family_tree_data: str) -> "FamilyTreeRenderer":
-        return cls(FamilyTree.from_data(family_tree_data))
-
-    @classmethod
     def from_json(cls, family_tree_json: str) -> "FamilyTreeRenderer":
         return cls(FamilyTree.from_json(family_tree_json))
 

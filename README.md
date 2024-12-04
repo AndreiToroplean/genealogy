@@ -1,5 +1,5 @@
 # genealogy
-A standard for encoding family trees and a script to draw them in ascii.
+A set of tools to encode family trees and draw them using ascii art.
 
 (Tested on Windows, using Powershell, and Python 3.13.)
 
@@ -14,7 +14,7 @@ pip install -e .
 
 ## Sample Usage
 ```
-genealogy sample_data.txt
+genealogy sample_data.json
 ```
 
 Output:

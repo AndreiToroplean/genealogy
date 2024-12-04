@@ -9,10 +9,6 @@ from genealogy.utils import Rel
 
 class FamilyTree:
     @classmethod
-    def from_data(cls, data: str) -> "FamilyTree":
-        return cls(cls._generate_people(data))
-
-    @classmethod
     def from_json(cls, json_data: str) -> "FamilyTree":
         data = json.loads(json_data)
         people_dict = {}
@@ -58,60 +54,6 @@ class FamilyTree:
     def __repr__(self):
         people_str = ",\n    ".join([repr(person) for person in self.people])
         return f"FamilyTree([\n    {people_str}\n])"
-
-    @staticmethod
-    def _generate_people(data):
-        people_dict = {}
-        lines = iter(data.splitlines())
-
-        # Parse IDs and create Person objects
-        for line in lines:
-            line = line.strip()
-            if line.startswith("#"):
-                continue
-
-            if not line:
-                # After a line skip, we stop parsing IDs
-                break
-
-            id_, name = [s.strip() for s in line.split(":")]
-            if id_ in people_dict:
-                raise Exception(f"IDs must be unique. '{id_}' is repeated.")
-            person = Person(id_)
-            person.set_names_from_str(name)
-            people_dict[id_] = person
-
-        # Parse relationships and set them on Person objects
-        for line in lines:
-            line = line.strip()
-            if line.startswith("#") or not line:
-                continue
-
-            key, parent_id = line.split(":")
-            child_id, rel = key.split(",")
-            child_id = child_id.strip()
-            rel = rel.strip()
-            parent_id = parent_id.strip()
-
-            # Get or create child
-            child = people_dict.get(child_id)
-            if not child:
-                child = Person(child_id)
-                child.set_names_from_str(child_id)
-                people_dict[child_id] = child
-
-            # Get or create parent
-            parent = people_dict.get(parent_id)
-            if not parent:
-                parent = Person(parent_id)
-                parent.set_names_from_str(parent_id)
-                people_dict[parent_id] = parent
-
-            # Add relationships
-            child.parents[Rel[rel]] = parent
-            parent.children.append(child)
-
-        return people_dict.values()
 
     def _perform_augmented_top_sort(self, n_iterations=64):
         visited = []
