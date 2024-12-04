@@ -16,7 +16,7 @@ class FamilyTree:
     def __init__(self, people: Iterable[Person]):
         random.seed(0)
 
-        self._people: list[Person] = list(people)
+        self.people: list[Person] = list(people)
         self._coords = {}
 
         self._cxs = []
@@ -27,7 +27,7 @@ class FamilyTree:
         self._draw_surf()
 
     def __repr__(self):
-        people_str = ",\n    ".join([repr(person) for person in self._people])
+        people_str = ",\n    ".join([repr(person) for person in self.people])
         return f"FamilyTree([\n    {people_str}\n])"
 
     def draw(self):
@@ -104,7 +104,7 @@ class FamilyTree:
         visited = []
         sorted_nodes = []
         while True:
-            for node in self._people:
+            for node in self.people:
                 if node not in visited:
                     break
 
@@ -115,7 +115,7 @@ class FamilyTree:
             sorted_nodes.append(node)
 
         sorted_nodes.reverse()
-        self._people[:] = sorted_nodes
+        self.people[:] = sorted_nodes
 
         for i in range(n_iterations):
             self._pull_children_down(p_skip=0.0, skip_if_not_found=True)
@@ -144,10 +144,10 @@ class FamilyTree:
             return True
 
     def _pull_parents_up(self, *, force=1.0, p_skip=0.0, skip_if_not_found=False):
-        for i, person in enumerate(self._people):
+        for i, person in enumerate(self.people):
             if random.random() < p_skip:
                 continue
-            for j, pot_child in zip(range(len(self._people[:i]) - 1, -1, -1), reversed(self._people[:i])):
+            for j, pot_child in zip(range(len(self.people[:i]) - 1, -1, -1), reversed(self.people[:i])):
                 if pot_child in person.children:
                     break
             else:
@@ -156,36 +156,36 @@ class FamilyTree:
                 j = 0
 
             j = round(i + (j + 1 - i) * force)
-            self._people.insert(j, self._people.pop(i))
+            self.people.insert(j, self.people.pop(i))
 
     def _pull_children_down(self, *, force=1.0, p_skip=0.0, skip_if_not_found=False):
-        for i, person in enumerate(self._people):
+        for i, person in enumerate(self.people):
             if random.random() < p_skip:
                 continue
-            for j, pot_parent in enumerate(self._people[i + 1:], start=i + 1):
+            for j, pot_parent in enumerate(self.people[i + 1:], start=i + 1):
                 if pot_parent in person.parents.values():
                     break
             else:
                 if skip_if_not_found:
                     continue
-                j = len(self._people)
+                j = len(self.people)
 
             j = round(i + (j - 1 - i) * force)
-            self._people.insert(j, self._people.pop(i))
+            self.people.insert(j, self.people.pop(i))
 
     def _compute_generations(self):
-        for i, person in enumerate(self._people):
+        for i, person in enumerate(self.people):
             for child in person.children:
-                for pot_child in self._people[:i]:
+                for pot_child in self.people[:i]:
                     if pot_child == child:
                         person.generation = max(person.generation, pot_child.generation + 1)
                 else:
                     continue
 
-        for i, person in zip(range(len(self._people) - 1, -1, -1), reversed(self._people)):
+        for i, person in zip(range(len(self.people) - 1, -1, -1), reversed(self.people)):
             min_gen = inf
             for parent in person.parents.values():
-                for pot_parent in self._people[i:]:
+                for pot_parent in self.people[i:]:
                     if pot_parent == parent:
                         min_gen = min(min_gen, pot_parent.generation)
             if min_gen != inf:
@@ -194,7 +194,7 @@ class FamilyTree:
     def _draw_names_surf(self):
         prev_gen = -1
         line = 0
-        for person in self._people:
+        for person in self.people:
             line += 1 if person.generation > prev_gen else 2
             prev_gen = person.generation
             self._names_surf.draw(SurfPos.from_gen(line, person.generation), person.name)
@@ -232,8 +232,8 @@ class FamilyTree:
         return cxs
 
     def _generate_cxs(self):
-        cxs = [{} for _ in set(person.generation for person in self._people)]
-        for person in self._people:
+        cxs = [{} for _ in set(person.generation for person in self.people)]
+        for person in self.people:
             if not person.parents.values():
                 continue
 
