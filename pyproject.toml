@@ -11,6 +11,7 @@ genealogy = "genealogy.genealogy:main"
 
 [project.optional-dependencies]
 test = ["pytest"]
+dev = ["pre-commit", "mypy"]
 
 [build-system]
 requires = ["setuptools", "wheel"]
