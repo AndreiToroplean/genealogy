@@ -1,14 +1,16 @@
+from __future__ import annotations
+
 from enum import Enum
 
 
 class Relationship(Enum):
-    F = "father"
-    M = "mother"
-    AF = "adoptive father"
-    AM = "adoptive mother"
+    F: str = "father"
+    M: str = "mother"
+    AF: str = "adoptive father"
+    AM: str = "adoptive mother"
 
 
-ARROWS = {
+ARROWS: dict[str, str] = {
         "tail": "╘═",
         "head": "═ ",
         "connection": "═",
@@ -28,7 +30,7 @@ ARROWS = {
         "both_middle": "╬",
         }
 
-ARROWS_ARITHMETIC = {
+ARROWS_ARITHMETIC: dict[tuple[str, str], str] = {
     (ARROWS["start"], ARROWS["left"]): ARROWS["left_start"],
     (ARROWS["start"], ARROWS["right"]): ARROWS["right_start"],
     (ARROWS["end"], ARROWS["left"]): ARROWS["left_end"],
