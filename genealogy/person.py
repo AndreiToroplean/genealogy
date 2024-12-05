@@ -15,6 +15,7 @@ class Person:
             parents: dict[Relationship, Person] | None = None,
             children: list[Person] | None = None,
             generation: int = 0,
+            relax_position: float = 0.0,
     ):
         self.id: str = id_
         self.first_name: str = ""
@@ -26,6 +27,7 @@ class Person:
         self.parents: dict[Relationship, Person] = parents if parents is not None else {}
         self.children: list[Person] = children if children is not None else []
         self.generation: int = generation
+        self.relax_position: float = relax_position
 
     def __repr__(self) -> str:
         parents_repr = {rel.value: parent.id for rel, parent in self.parents.items()}
@@ -35,7 +37,8 @@ class Person:
             f", name={self.name!r}"
             f", parents={parents_repr!r}"
             f", children={children_repr!r}"
-            f", generation={self.generation!r})"
+            f", generation={self.generation!r}"
+            f", relax_position={self.relax_position!r})"
         )
 
     @property

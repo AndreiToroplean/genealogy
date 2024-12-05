@@ -33,8 +33,8 @@ class FamilyTree:
         random.seed(0)
 
         self.people: list[Person] = sorted(people)
-        self._perform_augmented_top_sort()
         self._compute_generations()
+        self._relax()
 
     def to_json(self) -> str:
         data = {
@@ -57,85 +57,57 @@ class FamilyTree:
         return f"FamilyTree([\n    {people_str}\n])"
 
     def _compute_generations(self) -> None:
+        self._sort_topologically()
+
         for i, person in enumerate(self.people):
             for child in person.children:
-                for potential_child in self.people[:i]:
-                    if potential_child == child:
-                        person.generation = max(person.generation, child.generation + 1)
-                else:
-                    continue
+                person.generation = max(person.generation, child.generation + 1)
 
         for i, person in zip(range(len(self.people) - 1, -1, -1), reversed(self.people)):
             min_generation: int | None = None
             for parent in person.parents.values():
-                for potential_parent in self.people[i:]:
-                    if potential_parent == parent:
-                        if min_generation is None or parent.generation < min_generation:
-                            min_generation = parent.generation
+                if min_generation is None or parent.generation < min_generation:
+                    min_generation = parent.generation
             if min_generation is not None:
                 person.generation = min_generation - 1
 
-    def _perform_augmented_top_sort(self, n_iterations: int = 64) -> None:
+    def _sort_topologically(self) -> None:
+        def append(n: Person) -> None:
+            sorted_nodes.append(n)
+
         visited: list[Person] = []
         sorted_nodes: list[Person] = []
         while True:
             for node in self.people:
                 if node not in visited:
-                    break
-
+                    node.traverse_children_depth_first(visited, append)
+                    append(node)
             else:
                 break
 
-            def append(n: Person) -> None:
-                sorted_nodes.append(n)
-            node.traverse_children_depth_first(visited, append)
-            append(node)
+        self.people[:] = reversed(sorted_nodes)
 
-        sorted_nodes.reverse()
-        self.people[:] = sorted_nodes
-
-        for i in range(n_iterations):
-            self._pull_children_down(p_skip=0.0, skip_if_not_found=True)
-            self._pull_parents_up(p_skip=0.0, skip_if_not_found=True)
-
-    def _pull_parents_up(
+    def _relax(
             self,
-            *,
-            force: float = 1.0,
-            p_skip: float = 0.0,
-            skip_if_not_found: bool = False,
+            n_iterations: int = 128,
+            force: float = 0.05,
+            children_force: float = 1.0,
+            parents_force: float = 1.0,
+            others_force: float = -0.1,
     ) -> None:
         for i, person in enumerate(self.people):
-            if random.random() < p_skip:
-                continue
-            for j, potential_child in zip(range(len(self.people[:i]) - 1, -1, -1), reversed(self.people[:i])):
-                if potential_child in person.children:
-                    break
-            else:
-                if skip_if_not_found:
-                    continue
-                j = 0
+            person.relax_position = -float(i)
 
-            j = round(i + (j + 1 - i) * force)
-            self.people.insert(j, self.people.pop(i))
+        for _ in range(n_iterations):
+            for person in self.people:
+                acceleration: float = 0.0
+                for other_person in self.people:
+                    if other_person in person.children:
+                        acceleration += (other_person.relax_position - person.relax_position) * children_force
+                    elif other_person in person.parents.values():
+                        acceleration += (other_person.relax_position - person.relax_position) * parents_force
+                    else:
+                        acceleration += (other_person.relax_position - person.relax_position) * others_force
+                person.relax_position += acceleration * force
 
-    def _pull_children_down(
-            self,
-            *,
-            force: float = 1.0,
-            p_skip: float = 0.0,
-            skip_if_not_found: bool = False,
-    ) -> None:
-        for i, person in enumerate(self.people):
-            if random.random() < p_skip:
-                continue
-            for j, potential_parent in enumerate(self.people[i + 1:], start=i + 1):
-                if potential_parent in person.parents.values():
-                    break
-            else:
-                if skip_if_not_found:
-                    continue
-                j = len(self.people)
-
-            j = round(i + (j - 1 - i) * force)
-            self.people.insert(j, self.people.pop(i))
+        self.people.sort(key=lambda p: -p.relax_position)
