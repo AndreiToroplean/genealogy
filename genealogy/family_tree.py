@@ -80,11 +80,11 @@ class FamilyTree:
             self._pull_parents_up(p_skip=0.0, skip_if_not_found=True)
 
     def _pull_parents_up(
-        self, 
-        *, 
-        force: float = 1.0, 
-        p_skip: float = 0.0, 
-        skip_if_not_found: bool = False,
+            self,
+            *,
+            force: float = 1.0,
+            p_skip: float = 0.0,
+            skip_if_not_found: bool = False,
     ) -> None:
         for i, person in enumerate(self.people):
             if random.random() < p_skip:
@@ -101,11 +101,11 @@ class FamilyTree:
             self.people.insert(j, self.people.pop(i))
 
     def _pull_children_down(
-        self, 
-        *, 
-        force: float = 1.0, 
-        p_skip: float = 0.0, 
-        skip_if_not_found: bool = False,
+            self,
+            *,
+            force: float = 1.0,
+            p_skip: float = 0.0,
+            skip_if_not_found: bool = False,
     ) -> None:
         for i, person in enumerate(self.people):
             if random.random() < p_skip:

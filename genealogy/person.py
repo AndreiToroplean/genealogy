@@ -9,12 +9,12 @@ class Person:
     NEE: str = " ne.e "  # Class constant for maiden name separator
 
     def __init__(
-        self, 
-        id_: str, 
-        name: str = "", 
-        parents: dict[Relationship, Person] | None = None, 
-        children: list[Person] | None = None, 
-        generation: int = 0,
+            self,
+            id_: str,
+            name: str = "",
+            parents: dict[Relationship, Person] | None = None,
+            children: list[Person] | None = None,
+            generation: int = 0,
     ):
         self.id: str = id_
         self.first_name: str = ""
@@ -74,9 +74,9 @@ class Person:
         )
 
     def traverse_children_depth_first(
-        self, 
-        visited: list[Person], 
-        func: Callable[[Person], None],
+            self,
+            visited: list[Person],
+            func: Callable[[Person], None],
     ) -> bool:
         if self in visited:
             return False
@@ -89,9 +89,9 @@ class Person:
         return True
 
     def traverse_parents_depth_first(
-        self,
-        visited: list[Person],
-        func: Callable[[Person], None],
+            self,
+            visited: list[Person],
+            func: Callable[[Person], None],
     ) -> bool:
         if self in visited:
             return False

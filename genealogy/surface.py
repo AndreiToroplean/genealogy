@@ -8,12 +8,12 @@ from genealogy.utils import ARROWS, ARROWS_ARITHMETIC
 
 class Surface(list["SurfaceLine"]):
     def draw(
-        self,
-        pos: SurfacePosition,
-        iterable: Sequence[str],
-        *,
-        up_to: bool = False,
-        no_overwrite: bool = False,
+            self,
+            pos: SurfacePosition,
+            iterable: Sequence[str],
+            *,
+            up_to: bool = False,
+            no_overwrite: bool = False,
     ) -> bool:
         if pos.line < 0:
             raise DrawError("line must be positive. ")
@@ -48,12 +48,12 @@ class SurfaceLine(list[str | None]):
         return self
 
     def draw(
-        self, 
-        index: int, 
-        iterable: Sequence[str],
-        *, 
-        up_to: bool = False, 
-        no_overwrite: bool = False,
+            self,
+            index: int,
+            iterable: Sequence[str],
+            *,
+            up_to: bool = False,
+            no_overwrite: bool = False,
     ) -> bool:
         if up_to:
             index -= len(iterable)
@@ -108,11 +108,11 @@ class ArrowsSurface(Surface):
                     self._draw_parent_connection(parent_coord, generation, couple_connection.allocated_channel)
 
     def _draw_channel(
-        self, 
-        generation: int, 
-        channel: int, 
-        start: int, 
-        end: int,
+            self,
+            generation: int,
+            channel: int,
+            start: int,
+            end: int,
     ) -> None:
         for line in range(start, end + 1):
             pos = SurfacePosition.from_generation(line, generation).connection_right(channel)
@@ -127,9 +127,9 @@ class ArrowsSurface(Surface):
                 self.draw(pos, ARROWS["middle"])
 
     def _draw_child_connection(
-        self, 
-        pos: SurfacePosition, 
-        channel: int,
+            self,
+            pos: SurfacePosition,
+            channel: int,
     ) -> None:
         connection_start_pos = pos.connection_tail
         connection_end_pos = pos.connection_right(channel)
@@ -142,10 +142,10 @@ class ArrowsSurface(Surface):
         self.draw(connection_start_pos, arrow, no_overwrite=True)
 
     def _draw_parent_connection(
-        self, 
-        parent_pos: SurfacePosition, 
-        child_generation: int, 
-        channel: int,
+            self,
+            parent_pos: SurfacePosition,
+            child_generation: int,
+            channel: int,
     ) -> None:
         connection_start_pos = parent_pos.connection_left(channel, child_generation)
         connection_end_pos = parent_pos.connection_head
@@ -158,9 +158,9 @@ class ArrowsSurface(Surface):
         self.draw(connection_start_pos, arrow, no_overwrite=True)
 
     def _get_connection_arrow(
-        self, 
-        pos: SurfacePosition, 
-        connection_arrow: str,
+            self,
+            pos: SurfacePosition,
+            connection_arrow: str,
     ) -> str:
         try:
             prev_arrow = self[pos.line][pos.index]

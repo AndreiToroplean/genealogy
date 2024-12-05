@@ -11,24 +11,24 @@ class Relationship(Enum):
 
 
 ARROWS: dict[str, str] = {
-        "tail": "╘═",
-        "head": "═ ",
-        "connection": "═",
-        "right": "╞",
-        "left": "╡",
-        "middle": "║",
-        "start": "╥",
-        "end": "╨",
-        "left_start": "╗",
-        "left_end": "╝",
-        "left_middle": "╣",
-        "right_start": "╔",
-        "right_end": "╚",
-        "right_middle": "╠",
-        "both_start": "╦",
-        "both_end": "╩",
-        "both_middle": "╬",
-        }
+    "tail": "╘═",
+    "head": "═ ",
+    "connection": "═",
+    "right": "╞",
+    "left": "╡",
+    "middle": "║",
+    "start": "╥",
+    "end": "╨",
+    "left_start": "╗",
+    "left_end": "╝",
+    "left_middle": "╣",
+    "right_start": "╔",
+    "right_end": "╚",
+    "right_middle": "╠",
+    "both_start": "╦",
+    "both_end": "╩",
+    "both_middle": "╬",
+}
 
 ARROWS_ARITHMETIC: dict[tuple[str, str], str] = {
     (ARROWS["start"], ARROWS["left"]): ARROWS["left_start"],
@@ -45,4 +45,4 @@ ARROWS_ARITHMETIC: dict[tuple[str, str], str] = {
     (ARROWS["left_middle"], ARROWS["right"]): ARROWS["both_middle"],
     (ARROWS["connection"], ARROWS["right"]): ARROWS["connection"],
     (ARROWS["connection"], ARROWS["left"]): ARROWS["connection"],
-    }
+}
