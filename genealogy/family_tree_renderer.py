@@ -48,7 +48,7 @@ class FamilyTreeRenderer:
     def _draw_arrows_surf(self):
         cxs = self._generate_cxs()
         cxs = self._allocate_channels(cxs)
-        self._arrows_surf.draw_connections(cxs, self._names_surf)
+        self._arrows_surf.draw_connections(cxs)
 
     @staticmethod
     def _allocate_channels(cxs):

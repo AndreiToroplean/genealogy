@@ -80,7 +80,7 @@ class SurfLine(list):
 
 
 class ArrowsSurface(Surface):
-    def draw_connections(self, cxs, names_surf):
+    def draw_connections(self, cxs):
         for gen, gen_cxs in enumerate(cxs):
             for cx in gen_cxs.values():
                 p_coords, c_coords, cx_min, cx_max, channel = cx
