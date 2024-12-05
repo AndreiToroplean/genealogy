@@ -1,18 +1,18 @@
-from .utils import Rel
+from .utils import Relationship
 
 
 class Person:
     NEE = " ne.e "  # Class constant for maiden name separator
 
-    def __init__(self, id, name="", parents=None, children=None, generation=0):
-        self.id = id
+    def __init__(self, id_, name="", parents=None, children=None, generation=0):
+        self.id = id_
         self.first_name = ""
         self.last_name = ""
         self.middle_name = ""
         self.maiden_name = ""
         if name:
             self.name = name
-        self.parents: dict[Rel, Person] = parents if parents is not None else {}
+        self.parents: dict[Relationship, Person] = parents if parents is not None else {}
         self.children: list[Person] = children if children is not None else []
         self.generation = generation
 
@@ -58,22 +58,22 @@ class Person:
             < (other.last_name, other.maiden_name, other.first_name, other.middle_name)
         )
 
-    def p_dfs(self, visited, func):
+    def traverse_children_depth_first(self, visited, func):
         if self in visited: return False
         visited.append(self)
 
         for parent in self.parents.values():
-            r = parent.p_dfs(visited, func)
+            r = parent.traverse_children_depth_first(visited, func)
             if not r: continue
             func(parent)
         return True
 
-    def c_dfs(self, visited, func):
+    def traverse_parents_depth_first(self, visited, func):
         if self in visited: return False
         visited.append(self)
 
         for child in self.children:
-            r = child.c_dfs(visited, func)
+            r = child.traverse_parents_depth_first(visited, func)
             if not r: continue
             func(child)
             return True

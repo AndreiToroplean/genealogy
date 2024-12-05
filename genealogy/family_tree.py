@@ -4,7 +4,7 @@ from math import inf
 import random
 
 from genealogy.person import Person
-from genealogy.utils import Rel
+from genealogy.utils import Relationship
 
 
 class FamilyTree:
@@ -12,20 +12,20 @@ class FamilyTree:
     def from_json(cls, json_data: str) -> "FamilyTree":
         data = json.loads(json_data)
         people_dict = {}
-        
+
         # Create all Person objects
         for id_, name in data["people"].items():
             person = Person(id_, name)
             people_dict[id_] = person
-            
+
         # Set up relationships
         for child_id, parents in data["relationships"].items():
             child = people_dict[child_id]
-            for rel, parent_id in parents.items():
+            for relationship, parent_id in parents.items():
                 parent = people_dict[parent_id]
-                child.parents[Rel[rel]] = parent
+                child.parents[Relationship[relationship]] = parent
                 parent.children.append(child)
-                
+
         return cls(people_dict.values())
 
     def __init__(self, people: Iterable[Person]):
@@ -42,7 +42,7 @@ class FamilyTree:
             },
             "relationships": {
                 person.id: {
-                    rel.name: parent.id 
+                    rel.name: parent.id
                     for rel, parent in person.parents.items()
                 }
                 for person in self.people
@@ -66,9 +66,9 @@ class FamilyTree:
             else:
                 break
 
-            def append(node):
-                sorted_nodes.append(node)
-            node.p_dfs(visited, append)
+            def append(n):
+                sorted_nodes.append(n)
+            node.traverse_children_depth_first(visited, append)
             append(node)
 
         sorted_nodes.reverse()
@@ -82,8 +82,8 @@ class FamilyTree:
         for i, person in enumerate(self.people):
             if random.random() < p_skip:
                 continue
-            for j, pot_child in zip(range(len(self.people[:i]) - 1, -1, -1), reversed(self.people[:i])):
-                if pot_child in person.children:
+            for j, potential_child in zip(range(len(self.people[:i]) - 1, -1, -1), reversed(self.people[:i])):
+                if potential_child in person.children:
                     break
             else:
                 if skip_if_not_found:
@@ -97,8 +97,8 @@ class FamilyTree:
         for i, person in enumerate(self.people):
             if random.random() < p_skip:
                 continue
-            for j, pot_parent in enumerate(self.people[i + 1:], start=i + 1):
-                if pot_parent in person.parents.values():
+            for j, potential_parent in enumerate(self.people[i + 1:], start=i + 1):
+                if potential_parent in person.parents.values():
                     break
             else:
                 if skip_if_not_found:
@@ -111,17 +111,17 @@ class FamilyTree:
     def _compute_generations(self):
         for i, person in enumerate(self.people):
             for child in person.children:
-                for pot_child in self.people[:i]:
-                    if pot_child == child:
-                        person.generation = max(person.generation, pot_child.generation + 1)
+                for potential_child in self.people[:i]:
+                    if potential_child == child:
+                        person.generation = max(person.generation, potential_child.generation + 1)
                 else:
                     continue
 
         for i, person in zip(range(len(self.people) - 1, -1, -1), reversed(self.people)):
-            min_gen = inf
+            min_generation = inf
             for parent in person.parents.values():
-                for pot_parent in self.people[i:]:
-                    if pot_parent == parent:
-                        min_gen = min(min_gen, pot_parent.generation)
-            if min_gen != inf:
-                person.generation = min_gen - 1
+                for potential_parent in self.people[i:]:
+                    if potential_parent == parent:
+                        min_generation = min(min_generation, potential_parent.generation)
+            if min_generation != inf:
+                person.generation = min_generation - 1

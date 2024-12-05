@@ -1,6 +1,6 @@
 from itertools import zip_longest
 
-from genealogy.utils import ARRS, ARRS_ARITHMETIC
+from genealogy.utils import ARROWS, ARROWS_ARITHMETIC
 
 
 class Surface(list):
@@ -9,19 +9,19 @@ class Surface(list):
             raise DrawError("line must be positive. ")
 
         self._extend_to_line(pos.line)
-        has_collided = self[pos.line].draw(pos.index, iterable, up_to=up_to, no_overwrite=no_overwrite)
+        has_collided = self[pos.line].draw(pos.index_, iterable, up_to=up_to, no_overwrite=no_overwrite)
         return has_collided
 
     def add_line(self):
-        self.append(SurfLine())
+        self.append(SurfaceLine())
 
     def _extend_to_line(self, line):
         if len(self) <= line:
-            self.extend([SurfLine() for _ in range(line - len(self) + 1)])
+            self.extend([SurfaceLine() for _ in range(line - len(self) + 1)])
 
     def __add__(self, other):
         rtn = Surface()
-        for a_line, b_line in zip_longest(self, other, fillvalue=SurfLine()):
+        for a_line, b_line in zip_longest(self, other, fillvalue=SurfaceLine()):
             rtn.append(a_line + b_line)
         return rtn
 
@@ -30,7 +30,7 @@ class Surface(list):
         return "\n".join([line.as_str for line in self])
 
 
-class SurfLine(list):
+class SurfaceLine(list):
     @classmethod
     def drawn(cls, index, iterable):
         self = cls()
@@ -42,7 +42,7 @@ class SurfLine(list):
             index -= len(iterable)
 
         if index < 0:
-            raise DrawError("index must be positive. ")
+            raise DrawError("index_ must be positive. ")
 
         if len(self) < index:
             self.extend([None for _ in range(index - len(self))])
@@ -51,96 +51,104 @@ class SurfLine(list):
             return False
 
         has_collided = False
-        for i, char in enumerate(iterable):
+        for i, arrow in enumerate(iterable):
             if len(self) == index + i:
-                self.append(char)
+                self.append(arrow)
                 continue
 
-            prev_char = self[index + i]
-            if prev_char is not None:
+            prev_arrow = self[index + i]
+            if prev_arrow is not None:
                 has_collided = True
-                if no_overwrite and char == ARRS["co"]:
+                if no_overwrite and arrow == ARROWS["connection"]:
                     continue
-            self[index + i] = char
+            self[index + i] = arrow
         return has_collided
 
     def __add__(self, other):
-        rtn = SurfLine()
-        for char, other_char in zip_longest(self, other, fillvalue=None):
-            if char is not None:
-                rtn.append(char)
+        rtn = SurfaceLine()
+        for arrow, other_arrow in zip_longest(self, other, fillvalue=None):
+            if arrow is not None:
+                rtn.append(arrow)
                 continue
 
-            rtn.append(other_char)
+            rtn.append(other_arrow)
         return rtn
 
     @property
     def as_str(self):
-        return "".join([char if char is not None else " " for char in self])
+        return "".join([arrow if arrow is not None else " " for arrow in self])
 
 
 class ArrowsSurface(Surface):
-    def draw_connections(self, cxs):
-        for gen, gen_cxs in enumerate(cxs):
-            for cx in gen_cxs.values():
-                p_coords, c_coords, cx_min, cx_max, channel = cx
-                self._draw_channel(gen, channel, cx_min, cx_max)
-                for c_coord in c_coords:
-                    self._draw_child_co(c_coord, channel)
-                for p_coord in p_coords:
-                    self._draw_parent_co(p_coord, gen, channel)
+    def draw_connections(self, connections):
+        for generation, generation_connections in enumerate(connections):
+            for connection in generation_connections.values():
+                parent_coords, child_coords, connection_min, connection_max, channel = connection
+                self._draw_channel(generation, channel, connection_min, connection_max)
+                for child_coord in child_coords:
+                    self._draw_child_connection(child_coord, channel)
+                for parent_coord in parent_coords:
+                    self._draw_parent_connection(parent_coord, generation, channel)
 
-    def _draw_channel(self, gen, channel, start, end):
+    def _draw_channel(self, generation, channel, start, end):
         for line in range(start, end + 1):
-            pos = SurfPos.from_gen(line, gen).co_right(channel)
+            pos = SurfacePosition.from_generation(line, generation).connection_right(channel)
             if line == start:
                 if line == end:
-                    self.draw(pos, ARRS["co"])
+                    self.draw(pos, ARROWS["connection"])
                     continue
-                self.draw(pos, ARRS["start"])
+                self.draw(pos, ARROWS["start"])
             elif line == end:
-                self.draw(pos, ARRS["end"])
+                self.draw(pos, ARROWS["end"])
             else:
-                self.draw(pos, ARRS["middle"])
+                self.draw(pos, ARROWS["middle"])
 
-    def _draw_child_co(self, pos, channel):
-        co_start_pos = pos.co_tail
-        co_end_pos = pos.co_right(channel)
-        co_len = co_end_pos.index - co_start_pos.index - len(ARRS["tail"])
-        arr = ARRS["tail"] + ARRS["co"] * co_len + self._co_char(co_end_pos, ARRS["left"])
-        self.draw(co_start_pos, arr, no_overwrite=True)
+    def _draw_child_connection(self, pos, channel):
+        connection_start_pos = pos.connection_tail
+        connection_end_pos = pos.connection_right(channel)
+        connection_len = connection_end_pos.index_ - connection_start_pos.index_ - len(ARROWS["tail"])
+        arrow = (
+            ARROWS["tail"]
+            + ARROWS["connection"] * connection_len
+            + self._get_connection_arrow(connection_end_pos, ARROWS["left"])
+        )
+        self.draw(connection_start_pos, arrow, no_overwrite=True)
 
-    def _draw_parent_co(self, p_pos, c_gen, channel):
-        co_start_pos = p_pos.co_left(channel, c_gen)
-        co_end_pos = p_pos.co_head
-        co_len = co_end_pos.index - co_start_pos.index - len(ARRS["head"])
-        arr = self._co_char(co_start_pos, ARRS["right"]) + ARRS["co"] * (co_len - 1) + ARRS["head"]
-        self.draw(co_start_pos, arr, no_overwrite=True)
+    def _draw_parent_connection(self, parent_pos, child_generation, channel):
+        connection_start_pos = parent_pos.connection_left(channel, child_generation)
+        connection_end_pos = parent_pos.connection_head
+        connection_len = connection_end_pos.index_ - connection_start_pos.index_ - len(ARROWS["head"])
+        arrow = (
+            self._get_connection_arrow(connection_start_pos, ARROWS["right"])
+            + ARROWS["connection"] * (connection_len - 1)
+            + ARROWS["head"]
+        )
+        self.draw(connection_start_pos, arrow, no_overwrite=True)
 
-    def _co_char(self, pos, co_char):
+    def _get_connection_arrow(self, pos, connection_arrow):
         try:
-            prev_char = self[pos.line][pos.index]
+            prev_arrow = self[pos.line][pos.index_]
         except IndexError:
-            prev_char = None
+            prev_arrow = None
 
-        if prev_char is None:
-            return co_char
+        if prev_arrow is None:
+            return connection_arrow
 
-        return ARRS_ARITHMETIC[(prev_char, co_char)]
+        return ARROWS_ARITHMETIC[(prev_arrow, connection_arrow)]
 
 
-class SurfPos(list):
-    _gen_shift = 16
+class SurfacePosition(list):
+    _generation_shift = 16
     _start_shift = 4
-    _first_channel_shift = _start_shift + len(ARRS["tail"])
-    _add_channel_shift = 2
+    _first_channel_shift = _start_shift + len(ARROWS["tail"])
+    _additional_channel_shift = 2
 
     @classmethod
-    def from_gen(cls, line, gen):
-        return SurfPos([line, gen * cls._gen_shift])
+    def from_generation(cls, line, generation):
+        return SurfacePosition([line, generation * cls._generation_shift])
 
     def __add__(self, other):
-        return SurfPos([p_dim + p_dim_other for p_dim, p_dim_other in zip(self, other)])
+        return SurfacePosition([p_dim + p_dim_other for p_dim, p_dim_other in zip(self, other)])
 
     def __iadd__(self, other):
         for dim in range(len(self)):
@@ -148,25 +156,30 @@ class SurfPos(list):
         return self
 
     def __sub__(self, other):
-        return SurfPos([p_dim - p_dim_other for p_dim, p_dim_other in zip(self, other)])
+        return SurfacePosition([p_dim - p_dim_other for p_dim, p_dim_other in zip(self, other)])
 
     def __isub__(self, other):
         for dim in range(len(self)):
             self[dim] -= other[dim]
         return self
 
-    def co_right(self, channel):
-        return self + [0, self._first_channel_shift + channel * self._add_channel_shift]
+    def connection_right(self, channel):
+        return self + [0, self._first_channel_shift + channel * self._additional_channel_shift]
 
-    def co_left(self, channel, c_gen):
-        return SurfPos([self.line, self._first_channel_shift + channel * self._add_channel_shift + self._gen_shift * c_gen])
+    def connection_left(self, channel, child_generation):
+        index = (
+            self._first_channel_shift
+            + channel * self._additional_channel_shift
+            + self._generation_shift * child_generation
+        )
+        return SurfacePosition([self.line, index])
 
     @property
-    def co_tail(self):
+    def connection_tail(self):
         return self + [0, self._start_shift]
 
     @property
-    def co_head(self):
+    def connection_head(self):
         return self
 
     @property
@@ -174,7 +187,7 @@ class SurfPos(list):
         return self[0]
 
     @property
-    def index(self):
+    def index_(self):
         return self[1]
 
 
