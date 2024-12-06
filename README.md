@@ -19,20 +19,22 @@ genealogy sample_data.json
 
 Output:
 ```
-John Smith 
-    ╘═╦════════ Emily Smith ne.e Johnson
-      ║             ╘═╗
-      ╚════════ James Smith
-                Sarah Johnson
-                    ╘═╣
+      ╔════════ James Smith
+John Smith
+    ╘═╣
+      ╚════════ Emily Smith ne.e Johnson
+                    ╘═╗
+                      ╠════════ Robert Johnson
+                      ╠════════ Helen Johnson ne.e Brown
                 Michael Johnson
-                    ╘═╬════════ Helen Johnson ne.e Brown
-                      ╚════════ Robert Johnson
+                    ╘═╣
+                Sarah Johnson
+                    ╘═╝
 ```
 Meaning: 
-- John Smith's parents are Emily and James.
-- Emily's parents are Helen and Robert.
-- Emily has two siblings: Sarah and Michael (since we can see that they all share the same parents).
+- John Smith's parents are James and Emily.
+- Emily's parents are Robert and Helen.
+- Emily has two siblings: Michael and Sarah (since we can see that they all share the same parents).
 
 N.B.:
 - Only single-line indicators (╘═) are actually pointing to the names.

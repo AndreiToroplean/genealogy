@@ -28,6 +28,7 @@ ARROWS: dict[str, str] = {
     "both_start": "╦",
     "both_end": "╩",
     "both_middle": "╬",
+    "to_remove": "#",
 }
 
 ARROWS_ARITHMETIC: dict[tuple[str, str], str] = {

@@ -1,13 +1,121 @@
 from __future__ import annotations
 
+from collections.abc import Iterator, Sequence
 from itertools import zip_longest
-from collections.abc import Iterable, Sequence
-from typing import SupportsIndex
+from typing import Literal, overload, SupportsIndex
 
 from genealogy.utils import ARROWS, ARROWS_ARITHMETIC
 
 
 class Surface(list["SurfaceLine"]):
+    def compress_vertically(self) -> None:
+        self.pad_as_needed()
+
+        paths_surface = Surface()
+        visited: set[tuple[int, int]] = set()
+        for i, line in enumerate(self):
+            paths_surface.add_line()
+            if line and line[0] is not None:
+                continue
+
+            new_path_surface = Surface()
+            is_success = self._find_clear_path(SurfacePosition([i, 0]), new_path_surface, paths_surface, visited)
+            if is_success:
+                paths_surface += new_path_surface
+
+        self[:] = paths_surface + self
+
+        self._compress_from_clear_paths()
+
+    def _compress_from_clear_paths(self) -> None:
+        transposed_surface = self.transpose()
+        transposed_surface._remove_char(ARROWS["to_remove"])
+        compressed_surface = transposed_surface.transpose()
+        self[:] = compressed_surface
+
+    def transpose(self) -> Surface:
+        max_length = max(len(line) for line in self)
+        transposed_lines = []
+        for i in range(max_length):
+            new_line = SurfaceLine()
+            for line in self:
+                if i < len(line):
+                    char = line[i]
+                else:
+                    char = None
+                new_line.append(char)
+            transposed_lines.append(new_line)
+        new_surface = Surface(transposed_lines)
+        new_surface.strip()
+        return new_surface
+
+    def pad_as_needed(self) -> None:
+        max_length = max(len(line) for line in self)
+        for line in self:
+            line.extend([None for _ in range(max_length - len(line))])
+
+    def strip(self) -> None:
+        new_surface = Surface()
+        for line in self:
+            line.rstrip()
+            if line:
+                new_surface.append(line)
+        self[:] = new_surface
+
+    def _remove_char(self, char_to_remove: str) -> None:
+        for line in self:
+            line[:] = [char for char in line if char != char_to_remove]
+
+    def _find_clear_path(
+            self,
+            pos: SurfacePosition,
+            path_surface: Surface,
+            existing_paths_surface: Surface,
+            visited: set[tuple[int, int]],
+    ) -> bool:
+        if pos.as_tuple() in visited:
+            return False
+        visited.add(pos.as_tuple())
+
+        try:
+            char_self = self[pos]
+        except IndexError:
+            char_self = None
+        char_existing = existing_paths_surface[pos]
+
+        if char_self not in (None, ARROWS["middle"]) or char_existing is not None:
+            return False
+
+        path_surface.draw(pos, ARROWS["to_remove"])
+
+        if pos.index >= len(self[pos.line]) - 1:
+            return True
+
+        # Move up
+        if pos.line > 0:
+            new_pos = SurfacePosition([pos.line - 1, pos.index])
+            if self._find_clear_path(new_pos, path_surface, existing_paths_surface, visited):
+                path_surface.draw(pos, (None,))
+                visited.remove(pos.as_tuple())
+                return True
+
+        # Move right
+        new_pos = SurfacePosition([pos.line, pos.index + 1])
+        if self._find_clear_path(new_pos, path_surface, existing_paths_surface, visited):
+            return True
+
+        # Move down
+        if pos.line + 1 < len(self):
+            new_pos = SurfacePosition([pos.line + 1, pos.index])
+            if self._find_clear_path(new_pos, path_surface, existing_paths_surface, visited):
+                path_surface.draw(pos, (None,))
+                visited.remove(pos.as_tuple())
+                return True
+
+        # Backtrack
+        path_surface.draw(pos, (None,))
+        return False
+
     def draw(
             self,
             pos: SurfacePosition,
@@ -115,6 +223,10 @@ class SurfaceLine(list[str | None]):
                     continue
             self[index + i] = char
         return has_collided
+
+    def rstrip(self) -> None:
+        while self and self[-1] is None:
+            self.pop()
 
     def __iadd__(self, other: Sequence[str | None]) -> SurfaceLine:
         return self + other

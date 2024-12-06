@@ -1,9 +1,11 @@
+      ╔════════ James Smith
 John Smith
-    ╘═╦════════ Emily Smith ne.e Johnson
-      ║             ╘═╗
-      ╚════════ James Smith
-                Sarah Johnson
-                    ╘═╣
+    ╘═╣
+      ╚════════ Emily Smith ne.e Johnson
+                    ╘═╗
+                      ╠════════ Robert Johnson
+                      ╠════════ Helen Johnson ne.e Brown
                 Michael Johnson
-                    ╘═╬════════ Helen Johnson ne.e Brown
-                      ╚════════ Robert Johnson
+                    ╘═╣
+                Sarah Johnson
+                    ╘═╝
