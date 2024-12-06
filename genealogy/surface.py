@@ -103,7 +103,8 @@ class Surface(list["SurfaceLine"]):
             return True
 
         # Move up
-        if pos.line > 0:
+        if pos.line > 0 and char_self is None:
+            # N.B., we don't want to move up on anything but empty space
             new_pos = SurfacePosition([pos.line - 1, pos.index])
             if self._find_clear_path(new_pos, path_surface, existing_paths_surface, visited):
                 path_surface.draw(pos, (None,))
@@ -116,7 +117,8 @@ class Surface(list["SurfaceLine"]):
             return True
 
         # Move down
-        if pos.line + 1 < len(self):
+        if pos.line + 1 < len(self) and char_self is None:
+            # N.B., we don't want to move down on anything but empty space
             new_pos = SurfacePosition([pos.line + 1, pos.index])
             if self._find_clear_path(new_pos, path_surface, existing_paths_surface, visited):
                 path_surface.draw(pos, (None,))
