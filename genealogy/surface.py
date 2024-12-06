@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from itertools import zip_longest
 from collections.abc import Iterable, Sequence
+from typing import SupportsIndex
 
 from genealogy.utils import ARROWS, ARROWS_ARITHMETIC
 
@@ -10,7 +11,7 @@ class Surface(list["SurfaceLine"]):
     def draw(
             self,
             pos: SurfacePosition,
-            iterable: Sequence[str],
+            iterable: Sequence[str | None],
             *,
             up_to: bool = False,
             no_overwrite: bool = False,
@@ -29,14 +30,45 @@ class Surface(list["SurfaceLine"]):
         if len(self) <= line:
             self.extend([SurfaceLine() for _ in range(line - len(self) + 1)])
 
-    def __iadd__(self, other: list[SurfaceLine]) -> Surface:
+    def __iadd__(self, other: Sequence[SurfaceLine]) -> Surface:
         return self + other
 
-    def __add__(self, other: list[SurfaceLine]) -> Surface:
+    def __add__(self, other: Sequence[SurfaceLine]) -> Surface:
         rtn = Surface()
         for a_line, b_line in zip_longest(self, other, fillvalue=SurfaceLine()):
             rtn.append(a_line + b_line)
         return rtn
+
+    @overload
+    def __getitem__(self, item: int) -> SurfaceLine:
+        ...
+
+    @overload
+    def __getitem__(self, item: slice) -> Surface:
+        ...
+
+    @overload
+    def __getitem__(self, item: tuple[int, int]) -> str | None:
+        ...
+
+    @overload
+    def __getitem__(self, item: SurfacePosition) -> str | None:
+        ...
+
+    def __getitem__(
+            self,
+            item: SupportsIndex | slice | tuple[int, int] | SurfacePosition
+    ) -> Surface | SurfaceLine | str | None:
+        if isinstance(item, Sequence):
+            try:
+                return self[item[0]][item[1]]
+            except IndexError:
+                return None
+
+        if isinstance(item, slice):
+            return self.__class__(super().__getitem__(item))
+
+        return super().__getitem__(item)
 
     @property
     def as_str(self) -> str:
@@ -53,7 +85,7 @@ class SurfaceLine(list[str | None]):
     def draw(
             self,
             index: int,
-            iterable: Sequence[str],
+            iterable: Sequence[str | None],
             *,
             up_to: bool = False,
             no_overwrite: bool = False,
@@ -84,10 +116,10 @@ class SurfaceLine(list[str | None]):
             self[index + i] = char
         return has_collided
 
-    def __iadd__(self, other: list[str | None]) -> SurfaceLine:
+    def __iadd__(self, other: Sequence[str | None]) -> SurfaceLine:
         return self + other
 
-    def __add__(self, other: list[str | None]) -> SurfaceLine:
+    def __add__(self, other: Sequence[str | None]) -> SurfaceLine:
         rtn = SurfaceLine()
         for char, other_char in zip_longest(self, other, fillvalue=None):
             if char is not None:
@@ -107,7 +139,12 @@ class ArrowsSurface(Surface):
         for generation, generation_connections in enumerate(connections):
             for couple_connection in generation_connections.values():
                 assert couple_connection.allocated_channel is not None
-                self._draw_channel(generation, couple_connection.allocated_channel, couple_connection.min, couple_connection.max)
+                self._draw_channel(
+                    generation,
+                    couple_connection.allocated_channel,
+                    couple_connection.min,
+                    couple_connection.max
+                )
                 for child_coord in couple_connection.child_coords:
                     self._draw_child_connection(child_coord, couple_connection.allocated_channel)
                 for parent_coord in couple_connection.parent_coords:
@@ -179,7 +216,7 @@ class ArrowsSurface(Surface):
         return ARROWS_ARITHMETIC[(prev_arrow, connection_arrow)]
 
 
-class SurfacePosition:
+class SurfacePosition(Sequence[int]):
     _generation_shift: int = 16
     _start_shift: int = 4
     _first_channel_shift: int = _start_shift + len(ARROWS["tail"])
@@ -190,13 +227,17 @@ class SurfacePosition:
         return SurfacePosition([line, generation * cls._generation_shift])
 
     def __init__(self, values: Sequence[int]) -> None:
-        self.line = values[0]
-        self.index = values[1]
+        assert len(values) == 2
+        self.line: int = values[0]
+        self.index: int = values[1]
+
+    def as_tuple(self) -> tuple[int, int]:
+        return self.line, self.index
 
     def __repr__(self) -> str:
         return f"SurfacePosition({self.line}, {self.index})"
 
-    def __iter__(self) -> Iterable[int]:
+    def __iter__(self) -> Iterator[int]:
         yield self.line
         yield self.index
 
@@ -241,6 +282,17 @@ class SurfacePosition:
     @property
     def connection_head(self) -> SurfacePosition:
         return self
+
+    def __len__(self) -> Literal[2]:
+        return 2
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SurfacePosition):
+            return NotImplemented
+        return (self.line, self.index) == (other.line, other.index)
+
+    def __lt__(self, other: SurfacePosition) -> bool:
+        return (self.line, self.index) < (other.line, other.index)
 
 
 class CoupleConnection:
