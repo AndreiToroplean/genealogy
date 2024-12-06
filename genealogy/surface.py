@@ -29,6 +29,9 @@ class Surface(list["SurfaceLine"]):
         if len(self) <= line:
             self.extend([SurfaceLine() for _ in range(line - len(self) + 1)])
 
+    def __iadd__(self, other: list[SurfaceLine]) -> Surface:
+        return self + other
+
     def __add__(self, other: list[SurfaceLine]) -> Surface:
         rtn = Surface()
         for a_line, b_line in zip_longest(self, other, fillvalue=SurfaceLine()):
@@ -80,6 +83,9 @@ class SurfaceLine(list[str | None]):
                     continue
             self[index + i] = arrow
         return has_collided
+
+    def __iadd__(self, other: list[str | None]) -> SurfaceLine:
+        return self + other
 
     def __add__(self, other: list[str | None]) -> SurfaceLine:
         rtn = SurfaceLine()
