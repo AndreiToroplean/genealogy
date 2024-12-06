@@ -7,7 +7,7 @@ authors = [{ name = "Andrei Toroplean", email = "andrei.toroplean@gmail.com" }]
 license = { text = "MIT" }
 
 [project.entry-points.console_scripts]
-genealogy = "genealogy.genealogy:main"
+genealogy = "genealogy.genealogy:cli"
 
 [project.optional-dependencies]
 test = ["pytest"]
