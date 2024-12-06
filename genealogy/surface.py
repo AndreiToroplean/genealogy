@@ -7,10 +7,14 @@ from typing import Literal, overload, SupportsIndex
 from genealogy.utils import ARROWS, ARROWS_ARITHMETIC
 
 
+DEBUG = False
+
+
 class Surface(list["SurfaceLine"]):
     def compress_vertically(self) -> None:
         self.pad_as_needed()
 
+        debug_chars = "/*+.0#"
         paths_surface = Surface()
         visited: set[tuple[int, int]] = set()
         for i, line in enumerate(self):
@@ -21,11 +25,16 @@ class Surface(list["SurfaceLine"]):
             new_path_surface = Surface()
             is_success = self._find_clear_path(SurfacePosition([i, 0]), new_path_surface, paths_surface, visited)
             if is_success:
+                if DEBUG:
+                    new_path_surface.replace_chars(debug_chars[i % len(debug_chars)])
                 paths_surface += new_path_surface
 
         self[:] = paths_surface + self
 
-        self._compress_from_clear_paths()
+        if not DEBUG:
+            self._compress_from_clear_paths()
+
+        self.strip()
 
     def _compress_from_clear_paths(self) -> None:
         transposed_surface = self.transpose()
@@ -45,9 +54,11 @@ class Surface(list["SurfaceLine"]):
                     char = None
                 new_line.append(char)
             transposed_lines.append(new_line)
-        new_surface = Surface(transposed_lines)
-        new_surface.strip()
-        return new_surface
+        return Surface(transposed_lines)
+
+    def replace_chars(self, new_char: str) -> None:
+        for line in self:
+            line[:] = [new_char if char is not None else None for char in line]
 
     def pad_as_needed(self) -> None:
         max_length = max(len(line) for line in self)
