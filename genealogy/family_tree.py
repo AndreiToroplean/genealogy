@@ -56,6 +56,25 @@ class FamilyTree:
         people_str = ",\n    ".join([repr(person) for person in self.people])
         return f"FamilyTree([\n    {people_str}\n])"
 
+    def _compute_generations(self) -> None:
+        for i, person in enumerate(self.people):
+            for child in person.children:
+                for potential_child in self.people[:i]:
+                    if potential_child == child:
+                        person.generation = max(person.generation, child.generation + 1)
+                else:
+                    continue
+
+        for i, person in zip(range(len(self.people) - 1, -1, -1), reversed(self.people)):
+            min_generation: int | None = None
+            for parent in person.parents.values():
+                for potential_parent in self.people[i:]:
+                    if potential_parent == parent:
+                        if min_generation is None or parent.generation < min_generation:
+                            min_generation = parent.generation
+            if min_generation is not None:
+                person.generation = min_generation - 1
+
     def _perform_augmented_top_sort(self, n_iterations: int = 64) -> None:
         visited: list[Person] = []
         sorted_nodes: list[Person] = []
@@ -120,22 +139,3 @@ class FamilyTree:
 
             j = round(i + (j - 1 - i) * force)
             self.people.insert(j, self.people.pop(i))
-
-    def _compute_generations(self) -> None:
-        for i, person in enumerate(self.people):
-            for child in person.children:
-                for potential_child in self.people[:i]:
-                    if potential_child == child:
-                        person.generation = max(person.generation, child.generation + 1)
-                else:
-                    continue
-
-        for i, person in zip(range(len(self.people) - 1, -1, -1), reversed(self.people)):
-            min_generation: int | None = None
-            for parent in person.parents.values():
-                for potential_parent in self.people[i:]:
-                    if potential_parent == parent:
-                        if min_generation is None or parent.generation < min_generation:
-                            min_generation = parent.generation
-            if min_generation is not None:
-                person.generation = min_generation - 1
