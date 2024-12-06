@@ -71,17 +71,17 @@ class SurfaceLine(list[str | None]):
             return False
 
         has_collided = False
-        for i, arrow in enumerate(iterable):
+        for i, char in enumerate(iterable):
             if len(self) == index + i:
-                self.append(arrow)
+                self.append(char)
                 continue
 
-            prev_arrow = self[index + i]
-            if prev_arrow is not None:
+            prev_char = self[index + i]
+            if prev_char is not None:
                 has_collided = True
-                if no_overwrite and arrow == ARROWS["connection"]:
+                if no_overwrite and char == ARROWS["connection"]:
                     continue
-            self[index + i] = arrow
+            self[index + i] = char
         return has_collided
 
     def __iadd__(self, other: list[str | None]) -> SurfaceLine:
@@ -89,17 +89,17 @@ class SurfaceLine(list[str | None]):
 
     def __add__(self, other: list[str | None]) -> SurfaceLine:
         rtn = SurfaceLine()
-        for arrow, other_arrow in zip_longest(self, other, fillvalue=None):
-            if arrow is not None:
-                rtn.append(arrow)
+        for char, other_char in zip_longest(self, other, fillvalue=None):
+            if char is not None:
+                rtn.append(char)
                 continue
 
-            rtn.append(other_arrow)
+            rtn.append(other_char)
         return rtn
 
     @property
     def as_str(self) -> str:
-        return "".join([arrow if arrow is not None else " " for arrow in self])
+        return "".join([char if char is not None else " " for char in self])
 
 
 class ArrowsSurface(Surface):
