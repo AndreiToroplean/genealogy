@@ -4,6 +4,7 @@ from enum import Enum
 
 
 class Relationship(Enum):
+    """Represents the possible relationships between family members."""
     F: str = "father"
     M: str = "mother"
     AF: str = "adoptive father"
@@ -30,6 +31,7 @@ ARROWS: dict[str, str] = {
     "both_middle": "╬",
     "to_remove": "#",
 }
+"""Unicode box-drawing characters used to render the family tree connections."""
 
 ARROWS_ARITHMETIC: dict[tuple[str, str], str] = {
     (ARROWS["start"], ARROWS["left"]): ARROWS["left_start"],
@@ -47,3 +49,4 @@ ARROWS_ARITHMETIC: dict[tuple[str, str], str] = {
     (ARROWS["connection"], ARROWS["right"]): ARROWS["connection"],
     (ARROWS["connection"], ARROWS["left"]): ARROWS["connection"],
 }
+"""Mapping of box-drawing character combinations to create connection intersections."""

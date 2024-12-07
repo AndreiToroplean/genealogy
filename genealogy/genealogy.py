@@ -4,6 +4,11 @@ from genealogy.family_tree_renderer import FamilyTreeRenderer
 
 
 def main(data_path: str, output_path: str | None = None) -> None:
+    """Generate a visualization of a family tree using ASCII art.
+    
+    :param data_path: Path to input JSON file with family data. See "sample_data.json" for an example.
+    :param output_path: Optional path to save the rendered tree to.
+    """
     with open(data_path) as f:
         data: str = f.read()
     renderer: FamilyTreeRenderer = FamilyTreeRenderer.from_json(data)
@@ -15,6 +20,7 @@ def main(data_path: str, output_path: str | None = None) -> None:
 
 
 def cli() -> None:
+    """Command-line interface entry point for the genealogy tool."""
     import argparse
 
     parser: argparse.ArgumentParser = argparse.ArgumentParser(description="Generate a family tree.")

@@ -6,6 +6,8 @@ from .utils import Relationship
 
 
 class Person:
+    """Represents a person in the family tree with their relationships and positioning info."""
+
     NEE: str = " ne.e "  # Class constant for maiden name separator
 
     def __init__(
@@ -17,6 +19,17 @@ class Person:
             generation: int = 0,
             relax_position: float = 0.0,
     ):
+        """Initialize a person with their ID, name, relationships and positioning.
+        
+        :param id_: Unique identifier for the person.
+        :param name: Full name, optionally including maiden name after "ne.e".
+        :param parents: Dictionary mapping relationship type to parent Person.
+        :param children: List of child Person objects.
+        :param generation: Generation number, starting with 0 for the current generation offsprings.
+            Typically calculated by FamilyTree.
+        :param relax_position: Vertical position in the family tree, used to optimize the layout.
+            Typically calculated by FamilyTree.
+        """
         self.id: str = id_
         self.first_name: str = ""
         self.last_name: str = ""
@@ -43,6 +56,7 @@ class Person:
 
     @property
     def name(self) -> str:
+        """Get the full formatted name including first, middle, last and maiden names."""
         return (
             f"{self.first_name}"
             f"{' ' + self.middle_name if self.middle_name else ''}"
@@ -52,6 +66,10 @@ class Person:
 
     @name.setter
     def name(self, value: str) -> None:
+        """Set the person's name, parsing first, middle, last, and maiden names.
+
+        :param value: The full name, optionally including maiden name after 'ne.e'.
+        """
         if self.NEE in value:
             name_part, maiden_name = value.split(self.NEE, 1)
             self.maiden_name = maiden_name.strip()
@@ -64,11 +82,21 @@ class Person:
         self.middle_name = ' '.join(names[1:-1]) if len(names) > 2 else ''
 
     def __eq__(self, other: object) -> bool:
+        """Check if two Person objects are equal based on their IDs.
+
+        :param other: The other person to compare.
+        :return: True if the IDs are equal, False otherwise.
+        """
         if not isinstance(other, Person):
             return NotImplemented
         return self.id == other.id
 
     def __lt__(self, other: object) -> bool:
+        """Compare two Person objects for sorting purposes.
+
+        :param other: The other person to compare.
+        :return: True if self is less than other, based on the names.
+        """
         if not isinstance(other, Person):
             return NotImplemented
         return (
@@ -81,6 +109,12 @@ class Person:
             visited: list[Person],
             func: Callable[[Person], None],
     ) -> bool:
+        """Traverse the family tree depth-first through children.
+
+        :param visited: List of already visited Person objects.
+        :param func: Function to apply to each Person.
+        :return: True if the traversal was successful, False if a cycle was detected.
+        """
         if self in visited:
             return False
         visited.append(self)
@@ -96,6 +130,12 @@ class Person:
             visited: list[Person],
             func: Callable[[Person], None],
     ) -> bool:
+        """Traverse the family tree depth-first through parents.
+
+        :param visited: List of already visited Person objects.
+        :param func: Function to apply to each Person.
+        :return: True if the traversal was successful, False if a cycle was detected.
+        """
         if self in visited:
             return False
         visited.append(self)

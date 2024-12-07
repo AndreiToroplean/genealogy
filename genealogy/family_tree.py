@@ -9,8 +9,22 @@ from genealogy.utils import Relationship
 
 
 class FamilyTree:
+    """Manages a collection of Person objects and their relationships.
+
+    Has methods to compute the generations of people and optimize the layout of the family tree, as
+    well as methods to serialize and deserialize the data to and from JSON.
+    """
+
     @classmethod
     def from_json(cls, json_data: str) -> FamilyTree:
+        """Create a FamilyTree from a JSON string containing people and relationships.
+
+        The JSON should have "people" mapping IDs to full names and "relationships" mapping
+        child IDs to relationship types to parent IDs.
+
+        :param json_data: The JSON string containing the family data.
+        :return: A new `FamilyTree` instance created from the JSON data.
+        """
         data = json.loads(json_data)
         people_dict: dict[str, Person] = {}
 
@@ -30,6 +44,10 @@ class FamilyTree:
         return cls(people_dict.values())
 
     def __init__(self, people: Iterable[Person]):
+        """Initialize the FamilyTree with a list of Person objects.
+
+        :param people: An iterable of `Person` objects.
+        """
         random.seed(0)
 
         self.people: list[Person] = sorted(people)
@@ -37,6 +55,10 @@ class FamilyTree:
         self._relax()
 
     def to_json(self) -> str:
+        """Serialize the FamilyTree to a JSON string.
+
+        :return: The JSON representation of the FamilyTree.
+        """
         data = {
             "people": {
                 person.id: person.name for person in self.people
@@ -57,6 +79,11 @@ class FamilyTree:
         return f"FamilyTree([\n    {people_str}\n])"
 
     def _compute_generations(self) -> None:
+        """Compute the generation number for each person in the family tree.
+
+        Start with 0 for the current generation offsprings. Modify the generation attribute of each
+        Person based on their relationships.
+        """
         self._sort_topologically()
 
         for i, person in enumerate(self.people):
@@ -72,6 +99,7 @@ class FamilyTree:
                 person.generation = min_generation - 1
 
     def _sort_topologically(self) -> None:
+        """Sort the people in the family tree topologically."""
         def append(n: Person) -> None:
             sorted_nodes.append(n)
 
@@ -95,6 +123,14 @@ class FamilyTree:
             parents_force: float = 1.0,
             others_force: float = -0.1,
     ) -> None:
+        """Optimize the ordering of people to reduce distance between people in the same parental cluster.
+
+        :param n_iterations: Number of optimization iterations.
+        :param force: Overall force scaling factor.
+        :param children_force: Attractive force between parent and children.
+        :param parents_force: Attractive force between child and parents.
+        :param others_force: Attractive force between unrelated people. Would typically be negative.
+        """
         for i, person in enumerate(self.people):
             person.relax_position = -float(i)
 

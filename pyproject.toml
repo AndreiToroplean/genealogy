@@ -1,8 +1,8 @@
 [project]
 name = "genealogy"
 version = "1.0.0"
-#description = "A standard for encoding family trees and a script to draw them in ascii"
-description = "A set of tools to encode family trees and draw them using ascii art"
+#description = "A standard for encoding family trees and a script to draw them in ASCII"
+description = "A set of tools to encode family trees and draw them using ASCII art"
 authors = [{ name = "Andrei Toroplean", email = "andrei.toroplean@gmail.com" }]
 license = { text = "MIT" }
 

@@ -1,5 +1,5 @@
 # genealogy
-A set of tools to encode family trees and draw them using ascii art.
+A set of tools to encode family trees and draw them using ASCII art.
 
 (Tested on Windows, using Powershell, and Python 3.13.)
 
