@@ -23,7 +23,7 @@ class Surface(list["SurfaceLine"]):
                 continue
 
             new_path_surface = Surface()
-            is_success = self._find_clear_path(SurfacePosition([i, 0]), new_path_surface, paths_surface, visited)
+            is_success = self._find_clear_path(SurfacePosition([i, 0]), new_path_surface, visited)
             if is_success:
                 if DEBUG:
                     new_path_surface.replace_chars(debug_chars[i % len(debug_chars)])
@@ -80,7 +80,6 @@ class Surface(list["SurfaceLine"]):
             self,
             pos: SurfacePosition,
             path_surface: Surface,
-            existing_paths_surface: Surface,
             visited: set[tuple[int, int]],
     ) -> bool:
         if pos.as_tuple() in visited:
@@ -91,9 +90,8 @@ class Surface(list["SurfaceLine"]):
             char_self = self[pos]
         except IndexError:
             char_self = None
-        char_existing = existing_paths_surface[pos]
 
-        if char_self not in (None, ARROWS["middle"]) or char_existing is not None:
+        if char_self not in (None, ARROWS["middle"]):
             return False
 
         path_surface.draw(pos, ARROWS["to_remove"])
@@ -105,21 +103,21 @@ class Surface(list["SurfaceLine"]):
         if pos.line > 0 and char_self is None:
             # N.B., we don't want to move up on anything but empty space
             new_pos = SurfacePosition([pos.line - 1, pos.index])
-            if self._find_clear_path(new_pos, path_surface, existing_paths_surface, visited):
+            if self._find_clear_path(new_pos, path_surface, visited):
                 path_surface.draw(pos, (None,))
                 visited.remove(pos.as_tuple())
                 return True
 
         # Move right
         new_pos = SurfacePosition([pos.line, pos.index + 1])
-        if self._find_clear_path(new_pos, path_surface, existing_paths_surface, visited):
+        if self._find_clear_path(new_pos, path_surface, visited):
             return True
 
         # Move down
         if pos.line + 1 < len(self) and char_self is None:
             # N.B., we don't want to move down on anything but empty space
             new_pos = SurfacePosition([pos.line + 1, pos.index])
-            if self._find_clear_path(new_pos, path_surface, existing_paths_surface, visited):
+            if self._find_clear_path(new_pos, path_surface, visited):
                 path_surface.draw(pos, (None,))
                 visited.remove(pos.as_tuple())
                 return True
