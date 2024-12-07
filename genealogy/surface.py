@@ -37,12 +37,11 @@ class Surface(list["SurfaceLine"]):
         self.strip()
 
     def _compress_from_clear_paths(self) -> None:
-        transposed_surface = self.transpose()
-        transposed_surface._remove_char(ARROWS["to_remove"])
-        compressed_surface = transposed_surface.transpose()
-        self[:] = compressed_surface
+        self.transpose()
+        self._remove_char(ARROWS["to_remove"])
+        self.transpose()
 
-    def transpose(self) -> Surface:
+    def transpose(self) -> None:
         max_length = max(len(line) for line in self)
         transposed_lines = []
         for i in range(max_length):
@@ -54,7 +53,7 @@ class Surface(list["SurfaceLine"]):
                     char = None
                 new_line.append(char)
             transposed_lines.append(new_line)
-        return Surface(transposed_lines)
+        self[:] = transposed_lines
 
     def replace_chars(self, new_char: str) -> None:
         for line in self:
