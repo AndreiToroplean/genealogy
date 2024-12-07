@@ -135,13 +135,12 @@ class Surface(list["SurfaceLine"]):
             iterable: Sequence[str | None],
             *,
             up_to: bool = False,
-            no_overwrite: bool = False,
     ) -> bool:
         if pos.line < 0:
             raise DrawError("line must be positive. ")
 
         self._extend_to_line(pos.line)
-        has_collided = self[pos.line].draw(pos.index, iterable, up_to=up_to, no_overwrite=no_overwrite)
+        has_collided = self[pos.line].draw(pos.index, iterable, up_to=up_to)
         return has_collided
 
     def add_line(self) -> None:
@@ -209,7 +208,6 @@ class SurfaceLine(list[str | None]):
             iterable: Sequence[str | None],
             *,
             up_to: bool = False,
-            no_overwrite: bool = False,
     ) -> bool:
         if up_to:
             index -= len(iterable)
@@ -231,8 +229,11 @@ class SurfaceLine(list[str | None]):
 
             prev_char = self[index + i]
             if prev_char is not None:
-                has_collided = True
-                if no_overwrite and char == ARROWS["connection"]:
+                if char != ARROWS["connection"]:
+                    has_collided = True
+                else:
+                    # Special case, simple horizontal connections should never overwrite, so they
+                    # appear to be behind other connection types.
                     continue
             self[index + i] = char
         return has_collided
@@ -307,7 +308,7 @@ class ArrowsSurface(Surface):
             + ARROWS["connection"] * connection_len
             + self._get_connection_arrow(connection_end_pos, ARROWS["left"])
         )
-        self.draw(connection_start_pos, arrow, no_overwrite=True)
+        self.draw(connection_start_pos, arrow)
 
     def _draw_parent_connection(
             self,
@@ -323,7 +324,7 @@ class ArrowsSurface(Surface):
             + ARROWS["connection"] * (connection_len - 1)
             + ARROWS["head"]
         )
-        self.draw(connection_start_pos, arrow, no_overwrite=True)
+        self.draw(connection_start_pos, arrow)
 
     def _get_connection_arrow(
             self,
