@@ -5,6 +5,18 @@ import os
 from genealogy.family_tree_renderer import FamilyTreeRenderer
 
 
+def cli() -> None:
+    """Command-line interface entry point for the genealogy tool."""
+    import argparse
+
+    parser: argparse.ArgumentParser = argparse.ArgumentParser(description="Generate a family tree.")
+    parser.add_argument("data", help="Path to the input data file (a .json or .yml file).")
+    parser.add_argument("-o", "--output", help="Path to the output file.")
+    args = parser.parse_args()
+
+    main(args.data, args.output)
+
+
 def main(data_path: str, output_path: str | None = None) -> None:
     """Generate a visualization of a family tree using ASCII art.
     
@@ -26,18 +38,6 @@ def main(data_path: str, output_path: str | None = None) -> None:
     if output_path:
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(rendered_tree)
-
-
-def cli() -> None:
-    """Command-line interface entry point for the genealogy tool."""
-    import argparse
-
-    parser: argparse.ArgumentParser = argparse.ArgumentParser(description="Generate a family tree.")
-    parser.add_argument("data", help="Path to the input data file (a .json or .yml file).")
-    parser.add_argument("-o", "--output", help="Path to the output file.")
-    args = parser.parse_args()
-
-    main(args.data, args.output)
 
 
 if __name__ == "__main__":
