@@ -20,6 +20,15 @@ class FamilyTreeRenderer:
         """
         return cls(FamilyTree.from_json(family_tree_json))
 
+    @classmethod
+    def from_yaml(cls, family_tree_yaml: str) -> FamilyTreeRenderer:
+        """Create a FamilyTreeRenderer from a YAML string.
+
+        :param family_tree_yaml: YAML string representing a family tree.
+        :return: A new `FamilyTreeRenderer` object.
+        """
+        return cls(FamilyTree.from_yaml(family_tree_yaml))
+
     def __init__(self, family_tree: FamilyTree):
         """Initialize the FamilyTreeRenderer.
 

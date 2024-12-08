@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 import json
 import random
+import yaml
 
 from genealogy.person import Person
 from genealogy.utils import Relationship
@@ -25,23 +26,19 @@ class FamilyTree:
         :param json_data: The JSON string containing the family data.
         :return: A new `FamilyTree` instance created from the JSON data.
         """
-        data = json.loads(json_data)
-        people_dict: dict[str, Person] = {}
+        return cls._deserialize_data(json.loads(json_data))
 
-        # Create all Person objects
-        for id_, name in data["people"].items():
-            person = Person(id_, name)
-            people_dict[id_] = person
+    @classmethod
+    def from_yaml(cls, yaml_data: str) -> FamilyTree:
+        """Create a FamilyTree from a YAML string containing people and relationships.
 
-        # Set up relationships
-        for child_id, parents in data["relationships"].items():
-            child = people_dict[child_id]
-            for relationship, parent_id in parents.items():
-                parent = people_dict[parent_id]
-                child.parents[Relationship[relationship]] = parent
-                parent.children.append(child)
+        The YAML should have "people" mapping IDs to full names and "relationships" mapping
+        child IDs to relationship types to parent IDs.
 
-        return cls(people_dict.values())
+        :param yaml_data: The YAML string containing the family data.
+        :return: A new `FamilyTree` instance created from the YAML data.
+        """
+        return cls._deserialize_data(yaml.safe_load(yaml_data))
 
     def __init__(self, people: Iterable[Person]):
         """Initialize the FamilyTree with a list of Person objects.
@@ -59,7 +56,49 @@ class FamilyTree:
 
         :return: The JSON representation of the FamilyTree.
         """
-        data = {
+        return json.dumps(self._serialize_data(), indent=2)
+
+    def to_yaml(self) -> str:
+        """Serialize the FamilyTree to a YAML string.
+
+        :return: The YAML representation of the FamilyTree.
+        """
+        return yaml.dump(self._serialize_data(), indent=2)
+
+    def __repr__(self) -> str:
+        people_str = ",\n    ".join([repr(person) for person in self.people])
+        return f"FamilyTree([\n    {people_str}\n])"
+
+    @classmethod
+    def _deserialize_data(cls, data: dict) -> FamilyTree:
+        """Helper method to create a FamilyTree from deserialized data.
+
+        :param data: Dict containing people and relationships data.
+        :return: A new FamilyTree instance.
+        """
+        people_dict: dict[str, Person] = {}
+
+        # Create all Person objects
+        for id_, name in data["people"].items():
+            person = Person(id_, name)
+            people_dict[id_] = person
+
+        # Set up relationships
+        for child_id, parents in data["relationships"].items():
+            child = people_dict[child_id]
+            for relationship, parent_id in parents.items():
+                parent = people_dict[parent_id]
+                child.parents[Relationship[relationship]] = parent
+                parent.children.append(child)
+
+        return cls(people_dict.values())
+
+    def _serialize_data(self) -> dict:
+        """Helper method to prepare data for serialization.
+
+        :return: Dict containing people and relationships data.
+        """
+        return {
             "people": {
                 person.id: person.name for person in self.people
             },
@@ -72,11 +111,6 @@ class FamilyTree:
                 if person.parents
             }
         }
-        return json.dumps(data, indent=2)
-
-    def __repr__(self) -> str:
-        people_str = ",\n    ".join([repr(person) for person in self.people])
-        return f"FamilyTree([\n    {people_str}\n])"
 
     def _compute_generations(self) -> None:
         """Compute the generation number for each person in the family tree.
