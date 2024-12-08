@@ -34,10 +34,11 @@ def main(data_path: str, output_path: str | None = None) -> None:
     else:
         raise ValueError("Data file must be in JSON or YAML format.")
     rendered_tree: str = renderer.render()
-    print(rendered_tree)
     if output_path:
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(rendered_tree)
+    else:
+        print(rendered_tree)
 
 
 if __name__ == "__main__":
