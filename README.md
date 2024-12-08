@@ -14,7 +14,7 @@ pip install -e .
 
 ## Sample Usage
 ```
-genealogy sample_data.json
+genealogy sample_data.yml
 ```
 
 Output:

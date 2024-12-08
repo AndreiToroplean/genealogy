@@ -1,0 +1,21 @@
+people:
+  Emily: Emily Smith ne.e Johnson
+  Helen: Helen Johnson ne.e Brown
+  James: James Smith
+  John: John Smith
+  Michael: Michael Johnson
+  Robert: Robert Johnson
+  Sarah: Sarah Johnson
+relationships:
+  Emily:
+    F: Robert
+    M: Helen
+  John:
+    F: James
+    M: Emily
+  Michael:
+    F: Robert
+    M: Helen
+  Sarah:
+    F: Robert
+    M: Helen
