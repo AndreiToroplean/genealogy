@@ -104,27 +104,6 @@ class Person:
             < (other.last_name, other.maiden_name, other.first_name, other.middle_name)
         )
 
-    def traverse_children_depth_first(
-            self,
-            visited: list[Person],
-            func: Callable[[Person], None],
-    ) -> bool:
-        """Traverse the family tree depth-first through children.
-
-        :param visited: List of already visited Person objects.
-        :param func: Function to apply to each Person.
-        :return: True if the traversal was successful, False if a cycle was detected.
-        """
-        if self in visited:
-            return False
-        visited.append(self)
-
-        for parent in self.parents.values():
-            rtn = parent.traverse_children_depth_first(visited, func)
-            if rtn:
-                func(parent)
-        return True
-
     def traverse_parents_depth_first(
             self,
             visited: list[Person],
@@ -134,14 +113,35 @@ class Person:
 
         :param visited: List of already visited Person objects.
         :param func: Function to apply to each Person.
-        :return: True if the traversal was successful, False if a cycle was detected.
+        :return: True if the Person was not visited, False otherwise.
+        """
+        if self in visited:
+            return False
+        visited.append(self)
+
+        for parent in self.parents.values():
+            rtn = parent.traverse_parents_depth_first(visited, func)
+            if rtn:
+                func(parent)
+        return True
+
+    def traverse_children_depth_first(
+            self,
+            visited: list[Person],
+            func: Callable[[Person], None],
+    ) -> bool:
+        """Traverse the family tree depth-first through children.
+
+        :param visited: List of already visited Person objects.
+        :param func: Function to apply to each Person.
+        :return: True if the Person was not visited, False otherwise.
         """
         if self in visited:
             return False
         visited.append(self)
 
         for child in self.children:
-            rtn = child.traverse_parents_depth_first(visited, func)
+            rtn = child.traverse_children_depth_first(visited, func)
             if rtn:
                 func(child)
         return True

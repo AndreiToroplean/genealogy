@@ -142,7 +142,7 @@ class FamilyTree:
         while True:
             for node in self.people:
                 if node not in visited:
-                    node.traverse_children_depth_first(visited, append)
+                    node.traverse_parents_depth_first(visited, append)
                     append(node)
             else:
                 break
