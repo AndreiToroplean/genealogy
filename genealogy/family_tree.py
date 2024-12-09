@@ -134,18 +134,12 @@ class FamilyTree:
 
     def _sort_topologically(self) -> None:
         """Sort the people in the family tree topologically."""
-        def append(n: Person) -> None:
-            sorted_nodes.append(n)
-
         visited: list[Person] = []
+        processing: list[Person] = []
         sorted_nodes: list[Person] = []
-        while True:
-            for node in self.people:
-                if node not in visited:
-                    node.traverse_parents_depth_first(visited, append)
-                    append(node)
-            else:
-                break
+        for node in self.people:
+            if node not in visited:
+                node.traverse_parents_depth_first(visited, processing, post_order_callback=sorted_nodes.append)
 
         self.people[:] = reversed(sorted_nodes)
 

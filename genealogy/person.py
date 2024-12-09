@@ -42,6 +42,9 @@ class Person:
         self.generation: int = generation
         self.relax_position: float = relax_position
 
+    def __str__(self) -> str:
+        return f"Person({self.id!r})"
+
     def __repr__(self) -> str:
         parents_repr = {rel.value: parent.id for rel, parent in self.parents.items()}
         children_repr = [child.id for child in self.children]
@@ -107,41 +110,67 @@ class Person:
     def traverse_parents_depth_first(
             self,
             visited: list[Person],
-            func: Callable[[Person], None],
-    ) -> bool:
+            processing: list[Person],
+            pre_order_callback: Callable[[Person], None] = lambda x: None,
+            post_order_callback: Callable[[Person], None] = lambda x: None,
+    ) -> None:
         """Traverse the family tree depth-first through parents.
 
         :param visited: List of already visited Person objects.
-        :param func: Function to apply to each Person.
-        :return: True if the Person was not visited, False otherwise.
+        :param processing: List of Person objects currently being processed.
+        :param pre_order_callback: Function to apply to each Person before visiting parents.
+        :param post_order_callback: Function to apply to each Person after visiting parents.
+        :raises ValueError: If a cycle is detected in the family tree.
         """
+        if self in processing:
+            cycle = " -> ".join([str(person) for person in processing[processing.index(self):]])
+            raise ValueError(f"Cycle detected: {cycle}")
+        processing = processing + [self]
+
         if self in visited:
-            return False
+            return
         visited.append(self)
 
+        pre_order_callback(self)
         for parent in self.parents.values():
-            rtn = parent.traverse_parents_depth_first(visited, func)
-            if rtn:
-                func(parent)
-        return True
+            parent.traverse_parents_depth_first(
+                visited,
+                processing,
+                pre_order_callback,
+                post_order_callback,
+            )
+        post_order_callback(self)
 
     def traverse_children_depth_first(
             self,
             visited: list[Person],
-            func: Callable[[Person], None],
-    ) -> bool:
+            processing: list[Person],
+            pre_order_callback: Callable[[Person], None] = lambda x: None,
+            post_order_callback: Callable[[Person], None] = lambda x: None,
+    ) -> None:
         """Traverse the family tree depth-first through children.
 
         :param visited: List of already visited Person objects.
-        :param func: Function to apply to each Person.
-        :return: True if the Person was not visited, False otherwise.
+        :param processing: List of Person objects currently being processed.
+        :param pre_order_callback: Function to apply to each Person before visiting children.
+        :param post_order_callback: Function to apply to each Person after visiting children.
+        :raises ValueError: If a cycle is detected in the family tree.
         """
+        if self in processing:
+            cycle = " -> ".join([str(person) for person in processing[processing.index(self):]])
+            raise ValueError(f"Cycle detected: {cycle}")
+        processing = processing + [self]
+
         if self in visited:
-            return False
+            return
         visited.append(self)
 
+        pre_order_callback(self)
         for child in self.children:
-            rtn = child.traverse_children_depth_first(visited, func)
-            if rtn:
-                func(child)
-        return True
+            child.traverse_children_depth_first(
+                visited,
+                processing,
+                pre_order_callback,
+                post_order_callback,
+            )
+        post_order_callback(self)
