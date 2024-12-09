@@ -78,16 +78,16 @@ class FamilyTree:
         """
         people_dict: dict[str, Person] = {}
 
-        # Create all Person objects
+        # Create Person objects from people data
         for id_, name in data["people"].items():
             person = Person(id_, name)
             people_dict[id_] = person
 
-        # Set up relationships
+        # Set up relationships and add any additional people mentioned in relationships
         for child_id, parents in data["relationships"].items():
-            child = people_dict[child_id]
+            child = people_dict.setdefault(child_id, Person(child_id, child_id))
             for relationship, parent_id in parents.items():
-                parent = people_dict[parent_id]
+                parent = people_dict.setdefault(parent_id, Person(parent_id, parent_id))
                 child.parents[Relationship[relationship]] = parent
                 parent.children.append(child)
 
