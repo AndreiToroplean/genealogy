@@ -21,10 +21,8 @@ Output:
 ```
       ╔════════ James Smith
 John Smith
-    ╘═╣
-      ╚════════ Emily Smith ne.e Johnson
-                    ╘═╗
-                      ╠════════ Robert Johnson
+    ╘═╩════════ Emily Smith ne.e Johnson
+                    ╘═╦════════ Robert Johnson
                       ╠════════ Helen Johnson ne.e Brown
                 Michael Johnson
                     ╘═╣

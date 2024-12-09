@@ -64,10 +64,15 @@ class FamilyTreeRenderer:
         Position the names on the surface and record their coordinates.
         """
         line = 0
+        prev_person = None
         for person in self.family_tree.people:
+            if prev_person in person.children:
+                line -= 1
             self._names_surface.draw(SurfacePosition.from_generation(line, person.generation), person.name)
             self._coords[person.id] = SurfacePosition.from_generation(line, person.generation)
             line += 2
+
+            prev_person = person
 
     def _draw_arrows_surface(self) -> None:
         """Render the surface containing the arrows connecting the people in the family tree."""
