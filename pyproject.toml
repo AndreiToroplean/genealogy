@@ -6,6 +6,7 @@ description = "A set of tools to encode family trees and draw them using ASCII a
 authors = [{ name = "Andrei Toroplean", email = "andrei.toroplean@gmail.com" }]
 license = { text = "MIT" }
 dependencies = [
+    "Pillow",
     "PyYAML"
 ]
 
